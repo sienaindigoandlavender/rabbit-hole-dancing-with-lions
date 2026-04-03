@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { DecoderPoint, CITIES } from "@/app/lib/supabase";
-import MapExplorer from "@/app/components/MapExplorer";
+import GlobeExplorer from "@/app/components/GlobeExplorer";
 
 interface MapClientProps {
   points: DecoderPoint[];
@@ -12,6 +12,20 @@ interface MapClientProps {
 export default function MapClient({ points }: MapClientProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Live search results
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (q.length < 2) return [];
+    return points
+      .filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.city.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q)
+      )
+      .slice(0, 8);
+  }, [points, searchQuery]);
 
   const handleSearch = useCallback(
     (query: string) => {
@@ -96,7 +110,7 @@ export default function MapClient({ points }: MapClientProps) {
         </Link>
       </div>
 
-      {/* Search — top right */}
+      {/* Search — top right, terminal style */}
       <div className="fixed z-50" style={{ top: "26px", right: "26px" }}>
         {!searchOpen ? (
           <button
@@ -114,56 +128,92 @@ export default function MapClient({ points }: MapClientProps) {
             Search
           </button>
         ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSearch(searchQuery);
-            }}
-            className="flex items-center"
-            style={{ gap: "10px" }}
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search cities, places..."
-              autoFocus
-              className="font-sans bg-transparent focus:outline-none"
-              style={{
-                fontSize: "13px",
-                color: "#f5f0e8",
-                borderBottom: "1px solid rgba(245,240,232,0.2)",
-                padding: "4px 0",
-                width: "200px",
+          <div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch(searchQuery);
               }}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setSearchOpen(false);
-                setSearchQuery("");
-              }}
-              className="font-sans"
-              style={{
-                fontSize: "13px",
-                color: "#f5f0e8",
-                opacity: 0.3,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
+              className="flex items-center"
+              style={{ gap: "10px" }}
             >
-              ×
-            </button>
-          </form>
+              <span style={{ fontSize: "13px", color: "#d4a254", fontFamily: "monospace" }}>›</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder=""
+                autoFocus
+                className="bg-transparent focus:outline-none"
+                style={{
+                  fontSize: "13px",
+                  color: "#f5f0e8",
+                  fontFamily: "monospace",
+                  padding: "4px 0",
+                  width: "200px",
+                  border: "none",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                style={{ fontSize: "13px", color: "#f5f0e8", opacity: 0.3, background: "none", border: "none", cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </form>
+            {/* Live results */}
+            {searchQuery.length >= 2 && (
+              <div style={{ marginTop: "6px", maxHeight: "200px", overflowY: "auto" }}>
+                {searchResults.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      const flyTo = (window as unknown as Record<string, (lngLat: [number, number], zoom: number) => void>).__mapFlyTo;
+                      if (flyTo) flyTo([r.lng, r.lat], 14);
+                      setSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="block w-full text-left transition-colors duration-fast"
+                    style={{
+                      padding: "6px 0 6px 16px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "11px",
+                      fontFamily: "monospace",
+                      color: "#f5f0e8",
+                      opacity: 0.6,
+                    }}
+                  >
+                    <span style={{ color: "#d4a254" }}>{r.city}</span>
+                    <span style={{ opacity: 0.3 }}> — </span>
+                    {r.title}
+                  </button>
+                ))}
+                {searchResults.length === 0 && (
+                  <p style={{ padding: "6px 0 6px 16px", fontSize: "11px", fontFamily: "monospace", color: "#f5f0e8", opacity: 0.3 }}>
+                    no results
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Map fills entire viewport — no header, no padding */}
-      <MapExplorer points={points} className="w-full h-screen" />
+      {/* 3D Globe */}
+      <GlobeExplorer points={points} showStyleToggle showCoordinates />
 
       {/* Flower of Life — dark */}
       <div className="flower-of-life-dark" />
+
+      {/* Counter — bottom left, above coordinates */}
+      <div className="fixed z-40" style={{ bottom: "42px", left: "26px" }}>
+        <span style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.25, fontFamily: "monospace" }}>
+          {points.length} signals · {Array.from(new Set(points.map((p) => p.city))).length || 1} countries
+        </span>
+      </div>
     </div>
   );
 }
