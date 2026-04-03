@@ -30,6 +30,9 @@ export default function Footer() {
               <Link href="/about" className="font-sans text-text-secondary hover:text-text-primary transition-colors duration-fast" style={{ fontSize: "13px" }}>
                 Information
               </Link>
+              <Link href="/manifesto" className="font-sans text-text-secondary hover:text-text-primary transition-colors duration-fast" style={{ fontSize: "13px" }}>
+                The Archive
+              </Link>
             </div>
           </div>
 
