@@ -12,6 +12,34 @@ const STYLES = {
   satellite: "mapbox://styles/mapbox/satellite-v9",
 };
 
+const PAGE_BG = "#f7f5f0";
+
+function applyTransparentStyle(map: mapboxgl.Map) {
+  // Make water and background match the page
+  const style = map.getStyle();
+  if (!style) return;
+  style.layers.forEach((layer) => {
+    if (layer.id === "background" && layer.type === "background") {
+      map.setPaintProperty("background", "background-color", PAGE_BG);
+    }
+    if (layer.id === "water" || layer.id.startsWith("water")) {
+      if (layer.type === "fill") {
+        map.setPaintProperty(layer.id, "fill-color", "#e8e5de");
+      }
+    }
+    // Soften land boundaries
+    if (layer.id.includes("boundary") || layer.id.includes("admin")) {
+      if (layer.type === "line") {
+        map.setPaintProperty(layer.id, "line-opacity", 0.15);
+      }
+    }
+    // Soften labels
+    if (layer.type === "symbol") {
+      map.setPaintProperty(layer.id, "text-opacity", 0.4);
+    }
+  });
+}
+
 interface MapExplorerProps {
   points: DecoderPoint[];
   center?: [number, number];
@@ -21,6 +49,7 @@ interface MapExplorerProps {
   showStyleToggle?: boolean;
   showCoordinates?: boolean;
   mapStyle?: "dark" | "light";
+  transparent?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -45,6 +74,7 @@ export default function MapExplorer({
   showStyleToggle = false,
   showCoordinates = false,
   mapStyle = "dark",
+  transparent = false,
   className = "w-full h-screen",
   style: containerStyle,
 }: MapExplorerProps) {
@@ -222,13 +252,20 @@ export default function MapExplorer({
       maxZoom: 18, minZoom: 1,
       attributionControl: false,
       interactive,
+      projection: { name: "mercator" },
     });
 
     mapRef.current = map;
-    map.on("load", () => { addPointLayers(map); bindEvents(map); });
+    map.on("load", () => {
+      if (transparent) {
+        applyTransparentStyle(map);
+      }
+      addPointLayers(map);
+      bindEvents(map);
+    });
 
     return () => { cancelAnimationFrame(pulseRef.current); map.remove(); };
-  }, [points, center, zoom, interactive, showCard, mapStyle, addPointLayers, bindEvents]);
+  }, [points, center, zoom, interactive, showCard, mapStyle, transparent, addPointLayers, bindEvents]);
 
   const toggleStyle = useCallback(() => {
     const map = mapRef.current;
@@ -242,9 +279,12 @@ export default function MapExplorer({
     map.once("style.load", () => {
       map.setCenter(currentCenter);
       map.setZoom(currentZoom);
+      if (!newSat && transparent) {
+        applyTransparentStyle(map);
+      }
       addPointLayers(map);
     });
-  }, [isSatellite, mapStyle, addPointLayers]);
+  }, [isSatellite, mapStyle, transparent, addPointLayers]);
 
   return (
     <div className="relative">
