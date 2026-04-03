@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dancing with Lions — Cultural Intelligence",
+  title: "Dancing with Lions — Archive of Hidden Knowledge",
   description:
-    "A cultural intelligence platform. Discover what places mean, not just where they are.",
+    "An archive of hidden knowledge, mapped onto the world. Every entry is a person. Every story is true.",
   openGraph: {
     title: "Dancing with Lions",
     description:
-      "A cultural intelligence platform. Discover what places mean, not just where they are.",
+      "An archive of hidden knowledge, mapped onto the world.",
     url: "https://dancingwiththelions.com",
     siteName: "Dancing with Lions",
     type: "website",
@@ -50,7 +50,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-dark text-cream">
+      <body className="font-sans antialiased bg-paper text-text-primary">
         {children}
       </body>
     </html>

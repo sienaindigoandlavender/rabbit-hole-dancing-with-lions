@@ -20,10 +20,18 @@ const config: Config = {
     },
     extend: {
       colors: {
+        /* Warm archive palette */
+        paper: "#f7f5f0",
+        "paper-dark": "#efede6",
         dark: "#111111",
-        cream: "#f5f0e8",
+        "text-primary": "#1a1a1a",
+        "text-secondary": "#6b6860",
+        "text-tertiary": "#9b978f",
         terracotta: "#c4613a",
         amber: "#d4a254",
+        "border-warm": "#e5e2db",
+        /* Dark map palette (kept for /map) */
+        cream: "#f5f0e8",
         card: "#1a1a1a",
         border: "#2a2a2a",
         "border-hover": "#3a3a3a",
@@ -43,7 +51,8 @@ const config: Config = {
         "phi-8": "110px",
       },
       maxWidth: {
-        prose: "680px",
+        prose: "620px",
+        article: "900px",
       },
       lineHeight: {
         golden: "1.618",

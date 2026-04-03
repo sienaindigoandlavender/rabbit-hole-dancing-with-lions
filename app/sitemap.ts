@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getAllPoints, getCitySlug, CITIES } from "@/app/lib/supabase";
+import { getAllPoints } from "@/app/lib/supabase";
 
 function safeSitemapUrl(path: string): string {
   return path
@@ -15,33 +15,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://dancingwiththelions.com";
 
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
+    { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
+    { url: `${baseUrl}/map`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/calendar`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/glossary`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   ];
 
-  const cityPages: MetadataRoute.Sitemap = CITIES.map((city) => ({
-    url: safeSitemapUrl(`${baseUrl}/${city.slug}`),
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  const pointPages: MetadataRoute.Sitemap = points.map((point) => ({
-    url: safeSitemapUrl(`${baseUrl}/${getCitySlug(point.city)}/${point.id}`),
+  const entryPages: MetadataRoute.Sitemap = points.map((point) => ({
+    url: safeSitemapUrl(`${baseUrl}/archive/${point.id}`),
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
-    priority: 0.6,
+    priority: 0.7,
   }));
 
-  return [...staticPages, ...cityPages, ...pointPages];
+  return [...staticPages, ...entryPages];
 }

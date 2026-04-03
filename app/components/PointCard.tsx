@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { DecoderPoint, getCitySlug } from "@/app/lib/supabase";
+import { DecoderPoint } from "@/app/lib/supabase";
 
 interface PointCardProps {
   point: DecoderPoint;
@@ -12,8 +12,6 @@ interface PointCardProps {
 export default function PointCard({ point, onClose }: PointCardProps) {
   const [revealed, setRevealed] = useState(false);
   const [closing, setClosing] = useState(false);
-  const citySlug = getCitySlug(point.city);
-
   // Reset state when point changes
   useEffect(() => {
     setRevealed(false);
@@ -42,16 +40,15 @@ export default function PointCard({ point, onClose }: PointCardProps) {
           transform: closing ? "translateX(120%) translateY(-38.2%)" : undefined,
           width: "380px",
           maxHeight: "615px",
-          background: "#1a1a1a",
-          border: "1px solid #2a2a2a",
+          background: "#f7f5f0",
+          border: "1px solid #e5e2db",
           borderRadius: "10px",
           padding: "42px 26px",
-          boxShadow: "0 26px 68px rgba(0,0,0,0.5)",
+          boxShadow: "0 26px 68px rgba(120,100,80,0.15)",
         }}
       >
         <CardContent
           point={point}
-          citySlug={citySlug}
           revealed={revealed}
           onReveal={() => setRevealed(true)}
           onClose={handleClose}
@@ -73,7 +70,6 @@ export default function PointCard({ point, onClose }: PointCardProps) {
       >
         <CardContent
           point={point}
-          citySlug={citySlug}
           revealed={revealed}
           onReveal={() => setRevealed(true)}
           onClose={handleClose}
@@ -85,13 +81,11 @@ export default function PointCard({ point, onClose }: PointCardProps) {
 
 function CardContent({
   point,
-  citySlug,
   revealed,
   onReveal,
   onClose,
 }: {
   point: DecoderPoint;
-  citySlug: string;
   revealed: boolean;
   onReveal: () => void;
   onClose: () => void;
@@ -101,7 +95,7 @@ function CardContent({
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-0 right-0 text-cream/40 hover:text-cream transition-colors duration-fast text-xl leading-none"
+        className="absolute top-0 right-0 text-text-tertiary hover:text-text-primary transition-colors duration-fast text-xl leading-none"
         aria-label="Close"
       >
         ×
@@ -117,7 +111,7 @@ function CardContent({
 
       {/* Title — phi xl (26px) */}
       <h2
-        className="font-serif text-cream pr-phi-5"
+        className="font-serif text-text-primary pr-phi-5"
         style={{ fontSize: "26px", marginTop: "16px", lineHeight: "1.3" }}
       >
         {point.title}
@@ -135,7 +129,7 @@ function CardContent({
           fontSize: "20px",
           lineHeight: "1.618",
           marginTop: "26px",
-          color: "#f5f0e8",
+          color: "#1a1a1a",
           opacity: revealed ? undefined : 0.85,
         }}
       >
@@ -176,7 +170,7 @@ function CardContent({
                 fontSize: "16px",
                 lineHeight: "1.618",
                 marginTop: "26px",
-                color: "#f5f0e8",
+                color: "#1a1a1a",
                 opacity: 0.9,
               }}
             >
@@ -193,7 +187,7 @@ function CardContent({
                 marginTop: "42px",
                 padding: "26px",
                 borderRadius: "10px",
-                background: "#222222",
+                background: "#efede6",
                 borderLeft: "3px solid #c4613a",
               }}
             >
@@ -215,7 +209,7 @@ function CardContent({
                   style={{
                     fontSize: "13px",
                     marginLeft: "16px",
-                    color: "#f5f0e8",
+                    color: "#1a1a1a",
                     opacity: 0.7,
                   }}
                 >
@@ -228,7 +222,7 @@ function CardContent({
                   style={{
                     fontSize: "10px",
                     marginTop: "10px",
-                    color: "#f5f0e8",
+                    color: "#1a1a1a",
                     opacity: 0.5,
                   }}
                 >
@@ -241,7 +235,7 @@ function CardContent({
                   style={{
                     fontSize: "10px",
                     marginTop: "6px",
-                    color: "#f5f0e8",
+                    color: "#1a1a1a",
                     opacity: 0.5,
                   }}
                 >
@@ -253,7 +247,7 @@ function CardContent({
 
           {/* RHYTHM beat 3: Story link (400ms delay) */}
           <Link
-            href={`/${citySlug}/${point.id}`}
+            href={`/archive/${point.id}`}
             className="hermetic-rhythm-3 font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
             data-hermetic="rhythm"
             style={{
@@ -262,7 +256,7 @@ function CardContent({
               fontSize: "13px",
             }}
           >
-            Read full story →
+            Read full entry →
           </Link>
         </>
       )}

@@ -1,9 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 export interface DecoderPoint {
   id: string;
@@ -33,6 +35,7 @@ export interface DecoderTrail {
 }
 
 export async function getAllPoints(): Promise<DecoderPoint[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("decoder_points")
     .select(
@@ -48,6 +51,7 @@ export async function getAllPoints(): Promise<DecoderPoint[]> {
 }
 
 export async function getPointsByCity(city: string): Promise<DecoderPoint[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("decoder_points")
     .select("*")
@@ -62,6 +66,7 @@ export async function getPointsByCity(city: string): Promise<DecoderPoint[]> {
 }
 
 export async function getPointById(id: string): Promise<DecoderPoint | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("decoder_points")
     .select("*")
@@ -76,6 +81,7 @@ export async function getPointById(id: string): Promise<DecoderPoint | null> {
 }
 
 export async function getTrailsByCity(city: string): Promise<DecoderTrail[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("decoder_trails")
     .select("*")
@@ -89,6 +95,7 @@ export async function getTrailsByCity(city: string): Promise<DecoderTrail[]> {
 }
 
 export async function getTrailById(id: string): Promise<DecoderTrail | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("decoder_trails")
     .select("*")
