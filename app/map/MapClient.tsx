@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { DecoderPoint, CITIES } from "@/app/lib/supabase";
-import MapExplorer from "@/app/components/MapExplorer";
+import GlobeExplorer from "@/app/components/GlobeExplorer";
 
 interface MapClientProps {
   points: DecoderPoint[];
@@ -202,8 +202,8 @@ export default function MapClient({ points }: MapClientProps) {
         )}
       </div>
 
-      {/* Map — global view: centre [20, 15], zoom 2 */}
-      <MapExplorer points={points} center={[20, 15]} zoom={2} showStyleToggle showCoordinates className="w-full h-screen" />
+      {/* 3D Globe */}
+      <GlobeExplorer points={points} showStyleToggle showCoordinates />
 
       {/* Flower of Life — dark */}
       <div className="flower-of-life-dark" />
