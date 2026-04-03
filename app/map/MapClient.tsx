@@ -160,7 +160,7 @@ export default function MapClient({ points }: MapClientProps) {
       </div>
 
       {/* Map — global view: centre [20, 15], zoom 2 */}
-      <MapExplorer points={points} center={[20, 15]} zoom={2} className="w-full h-screen" />
+      <MapExplorer points={points} center={[20, 15]} zoom={2} showStyleToggle className="w-full h-screen" />
 
       {/* Flower of Life — dark */}
       <div className="flower-of-life-dark" />
