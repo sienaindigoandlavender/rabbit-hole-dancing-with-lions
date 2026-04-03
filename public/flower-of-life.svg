@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <g fill="none" stroke="#f5f0e8" stroke-width="0.5" opacity="1">
+    <!-- Centre circle -->
+    <circle cx="100" cy="100" r="33"/>
+    <!-- 6 surrounding circles (hexagonal arrangement) -->
+    <circle cx="100" cy="67" r="33"/>
+    <circle cx="128.6" cy="83.5" r="33"/>
+    <circle cx="128.6" cy="116.5" r="33"/>
+    <circle cx="100" cy="133" r="33"/>
+    <circle cx="71.4" cy="116.5" r="33"/>
+    <circle cx="71.4" cy="83.5" r="33"/>
+  </g>
+</svg>

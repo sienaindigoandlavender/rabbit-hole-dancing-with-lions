@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DecoderPoint, getCitySlug } from "@/app/lib/supabase";
 
@@ -12,10 +12,9 @@ interface PointCardProps {
 export default function PointCard({ point, onClose }: PointCardProps) {
   const [revealed, setRevealed] = useState(false);
   const [closing, setClosing] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
   const citySlug = getCitySlug(point.city);
 
-  // Reset revealed state when point changes
+  // Reset state when point changes
   useEffect(() => {
     setRevealed(false);
     setClosing(false);
@@ -23,15 +22,26 @@ export default function PointCard({ point, onClose }: PointCardProps) {
 
   const handleClose = () => {
     setClosing(true);
-    setTimeout(onClose, 300);
+    setTimeout(onClose, 400);
   };
 
   return (
     <>
-      {/* Desktop: right-side panel, vertically centred */}
+      {/* Desktop: golden rectangle card at phi vertical line (38.2% from top) */}
       <div
-        ref={cardRef}
-        className={`hidden md:block fixed right-6 top-1/2 -translate-y-1/2 w-[380px] max-h-[calc(100vh-80px)] overflow-y-auto bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-8 z-50 shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-out ${closing ? "translate-x-[120%]" : "animate-slideInRight"}`}
+        className={`hidden md:block fixed z-50 overflow-y-auto transition-transform duration-base ease-phi ${closing ? "translate-x-[120%]" : "animate-slideInRight"}`}
+        style={{
+          right: "26px",
+          top: "38.2%",
+          transform: closing ? "translateX(120%) translateY(-38.2%)" : undefined,
+          width: "380px",
+          maxHeight: "615px",
+          background: "#1a1a1a",
+          border: "1px solid #2a2a2a",
+          borderRadius: "10px",
+          padding: "42px 26px",
+          boxShadow: "0 26px 68px rgba(0,0,0,0.5)",
+        }}
       >
         <CardContent
           point={point}
@@ -42,9 +52,17 @@ export default function PointCard({ point, onClose }: PointCardProps) {
         />
       </div>
 
-      {/* Mobile: bottom sheet */}
+      {/* Mobile: bottom sheet at phi height (38.2vh) */}
       <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 h-[60vh] bg-[#1a1a1a] border-t border-[#2a2a2a] rounded-t-2xl p-6 z-50 shadow-[0_-20px_60px_rgba(0,0,0,0.5)] overflow-y-auto transition-transform duration-300 ease-out ${closing ? "translate-y-full" : "animate-slideInUp"}`}
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 overflow-y-auto transition-transform duration-base ease-phi ${closing ? "translate-y-full" : "animate-slideInUp"}`}
+        style={{
+          height: "38.2vh",
+          background: "#1a1a1a",
+          borderTop: "1px solid #2a2a2a",
+          borderRadius: "10px 10px 0 0",
+          padding: "26px",
+          boxShadow: "0 -26px 68px rgba(0,0,0,0.5)",
+        }}
       >
         <CardContent
           point={point}
@@ -72,28 +90,43 @@ function CardContent({
   onClose: () => void;
 }) {
   return (
-    <>
+    <div className="relative">
+      {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-cream/40 hover:text-cream transition-colors text-xl leading-none"
+        className="absolute top-0 right-0 text-cream/40 hover:text-cream transition-colors duration-fast text-xl leading-none"
         aria-label="Close"
       >
         ×
       </button>
 
-      {/* Category */}
-      <span className="text-xs uppercase tracking-widest text-terracotta font-sans">
+      {/* Category — phi sm (13px) */}
+      <span
+        className="font-sans uppercase text-terracotta"
+        style={{ fontSize: "13px", letterSpacing: "0.1em" }}
+      >
         {point.category}
       </span>
 
-      {/* Title */}
-      <h2 className="font-serif text-2xl text-cream mt-3 pr-6">
+      {/* Title — phi xl (26px) */}
+      <h2
+        className="font-serif text-cream pr-phi-5"
+        style={{ fontSize: "26px", marginTop: "16px", lineHeight: "1.3" }}
+      >
         {point.title}
       </h2>
 
-      {/* Question */}
+      {/* Question — phi lg (20px) with golden line-height */}
       <p
-        className={`font-serif italic text-lg mt-4 leading-relaxed transition-opacity duration-400 ${revealed ? "text-cream/50" : "text-cream/85"}`}
+        className="font-serif italic"
+        style={{
+          fontSize: "20px",
+          lineHeight: "1.618",
+          marginTop: "26px",
+          color: "#f5f0e8",
+          opacity: revealed ? 0.5 : 0.85,
+          transition: "opacity 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+        }}
       >
         {point.question}
       </p>
@@ -102,50 +135,109 @@ function CardContent({
       {!revealed ? (
         <button
           onClick={onReveal}
-          className="mt-6 text-sm text-amber font-sans hover:text-amber/80 transition-colors"
+          className="font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
+          style={{
+            fontSize: "13px",
+            marginTop: "42px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+          }}
         >
           Reveal →
         </button>
       ) : (
-        <div className="animate-fadeIn">
-          {/* Answer */}
-          <p className="text-base text-cream/90 font-sans mt-4 leading-[1.8]">
-            {point.answer}
-          </p>
+        <>
+          {/* Answer — phi base (16px) with golden line-height */}
+          <div className="animate-fadeIn-answer">
+            <p
+              className="font-sans"
+              style={{
+                fontSize: "16px",
+                lineHeight: "1.618",
+                marginTop: "26px",
+                color: "#f5f0e8",
+                opacity: 0.9,
+              }}
+            >
+              {point.answer}
+            </p>
+          </div>
 
-          {/* Darija box */}
+          {/* Darija box — staggered 200ms after answer */}
           {point.darija_word && (
-            <div className="mt-6 p-4 rounded-lg bg-[#222222] border-l-[3px] border-terracotta">
-              <span className="text-xl font-serif text-amber">
+            <div
+              className="animate-fadeIn-darija"
+              style={{
+                marginTop: "42px",
+                padding: "26px",
+                borderRadius: "10px",
+                background: "#222222",
+                borderLeft: "3px solid #c4613a",
+              }}
+            >
+              <span
+                className="font-serif text-amber"
+                style={{ fontSize: "26px" }}
+              >
                 {point.darija_word}
               </span>
               {point.darija_meaning && (
-                <span className="text-sm text-cream/70 ml-3">
+                <span
+                  className="font-sans"
+                  style={{
+                    fontSize: "13px",
+                    marginLeft: "16px",
+                    color: "#f5f0e8",
+                    opacity: 0.7,
+                  }}
+                >
                   {point.darija_meaning}
                 </span>
               )}
               {point.darija_literal && (
-                <p className="text-xs text-cream/50 mt-2">
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "10px",
+                    marginTop: "10px",
+                    color: "#f5f0e8",
+                    opacity: 0.5,
+                  }}
+                >
                   Literally: {point.darija_literal}
                 </p>
               )}
               {point.darija_context && (
-                <p className="text-xs text-cream/50 mt-1">
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "10px",
+                    marginTop: "6px",
+                    color: "#f5f0e8",
+                    opacity: 0.5,
+                  }}
+                >
                   {point.darija_context}
                 </p>
               )}
             </div>
           )}
 
-          {/* Read full story link */}
+          {/* Read full story — staggered 400ms */}
           <Link
             href={`/${citySlug}/${point.id}`}
-            className="block mt-6 text-sm text-amber font-sans hover:text-amber/80 transition-colors"
+            className="animate-fadeIn-link font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
+            style={{
+              display: "block",
+              marginTop: "42px",
+              fontSize: "13px",
+            }}
           >
             Read full story →
           </Link>
-        </div>
+        </>
       )}
-    </>
+    </div>
   );
 }

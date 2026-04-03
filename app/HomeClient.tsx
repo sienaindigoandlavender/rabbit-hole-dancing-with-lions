@@ -30,16 +30,31 @@ export default function HomeClient({ points }: HomeClientProps) {
       <Navigation onCityClick={handleCityClick} />
       <MapExplorer points={points} />
 
-      {/* Bottom left — counter */}
-      <div className="fixed bottom-6 left-6 z-40 md:block hidden">
-        <span className="text-xs font-sans text-cream/40">
+      {/* Flower of Life overlay — sacred geometry watermark */}
+      <div className="flower-of-life-bg" />
+
+      {/* Bottom left — counter at phi position (desktop) */}
+      <div
+        className="fixed z-40 hidden md:block"
+        style={{ bottom: "26px", left: "26px" }}
+      >
+        <span
+          className="font-sans"
+          style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}
+        >
           {totalPoints} secrets across {totalCities} cities
         </span>
       </div>
 
       {/* Mobile — bottom centre counter */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden">
-        <span className="text-xs font-sans text-cream/40">
+      <div
+        className="fixed left-1/2 -translate-x-1/2 z-40 md:hidden"
+        style={{ bottom: "26px" }}
+      >
+        <span
+          className="font-sans"
+          style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}
+        >
           {totalPoints} secrets across {totalCities} cities
         </span>
       </div>

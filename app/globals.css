@@ -12,21 +12,32 @@ body {
   overflow: hidden;
 }
 
-/* Slide in from right (desktop card) */
+/* Sacred geometry: golden ratio line-height */
+p,
+.prose {
+  line-height: 1.618;
+}
+
+/* Phi easing curve */
+:root {
+  --ease-phi: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Slide in from right — desktop card at phi vertical (38.2%) */
 @keyframes slideInRight {
   from {
-    transform: translateX(120%) translateY(-50%);
+    transform: translateX(120%) translateY(-38.2%);
   }
   to {
-    transform: translateX(0) translateY(-50%);
+    transform: translateX(0) translateY(-38.2%);
   }
 }
 
 .animate-slideInRight {
-  animation: slideInRight 0.3s ease-out forwards;
+  animation: slideInRight 400ms var(--ease-phi) forwards;
 }
 
-/* Slide up from bottom (mobile bottom sheet) */
+/* Slide up from bottom — mobile bottom sheet */
 @keyframes slideInUp {
   from {
     transform: translateY(100%);
@@ -37,14 +48,14 @@ body {
 }
 
 .animate-slideInUp {
-  animation: slideInUp 0.3s ease-out forwards;
+  animation: slideInUp 400ms var(--ease-phi) forwards;
 }
 
-/* Fade in for revealed content */
-@keyframes fadeIn {
+/* Fade in for revealed answer */
+@keyframes fadeInAnswer {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -52,8 +63,35 @@ body {
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out;
+.animate-fadeIn-answer {
+  animation: fadeInAnswer 600ms var(--ease-phi) forwards;
+}
+
+/* Staggered fade in for darija box (200ms delay) */
+.animate-fadeIn-darija {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 200ms forwards;
+}
+
+/* Staggered fade in for story link (400ms delay after answer) */
+.animate-fadeIn-link {
+  opacity: 0;
+  animation: fadeInAnswer 400ms var(--ease-phi) 400ms forwards;
+}
+
+/* Flower of Life overlay */
+.flower-of-life-bg {
+  background-image: url("/flower-of-life.svg");
+  background-repeat: repeat;
+  background-size: 200px;
+  opacity: 0.015;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
 /* Hide Mapbox controls */

@@ -29,11 +29,12 @@ export default function MapExplorer({
 
   const closeCard = useCallback(() => setSelectedPoint(null), []);
 
+  // flyTo uses phi duration-drift (1600ms)
   const flyTo = useCallback((lngLat: [number, number], targetZoom: number) => {
     mapRef.current?.flyTo({
       center: lngLat,
       zoom: targetZoom,
-      duration: 2000,
+      duration: 1600,
       essential: true,
     });
   }, []);
@@ -200,8 +201,6 @@ export default function MapExplorer({
         if (!showCard || !e.features?.length) return;
         const props = e.features[0].properties;
         if (!props) return;
-
-        // Find the full point data to pass to card
         const point = points.find((p) => p.id === props.id);
         if (point) {
           setSelectedPoint(point);
