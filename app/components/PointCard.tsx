@@ -144,6 +144,17 @@ function CardContent({
 }) {
   return (
     <>
+      {/* Satellite thumbnail */}
+      <div style={{ marginBottom: "16px", borderRadius: "4px", overflow: "hidden" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={point.photo_url || `https://maps.googleapis.com/maps/api/staticmap?center=${point.lat},${point.lng}&zoom=15&size=380x160&maptype=satellite&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}`}
+          alt={point.title}
+          className="w-full h-auto"
+          style={{ display: "block" }}
+        />
+      </div>
+
       {/* Category */}
       <span
         className="font-sans uppercase text-terracotta"
@@ -219,10 +230,10 @@ function CardContent({
           {/* Read full entry */}
           <Link
             href={`/archive/${point.id}`}
-            className="hermetic-rhythm-3 font-sans text-terracotta hover:text-terracotta/80 transition-colors duration-fast"
-            style={{ display: "block", marginTop: "42px", fontSize: "13px" }}
+            className="hermetic-rhythm-3 font-sans text-terracotta hover:text-terracotta/80 transition-colors duration-fast uppercase"
+            style={{ display: "block", marginTop: "42px", fontSize: "10px", letterSpacing: "0.15em" }}
           >
-            Read full entry →
+            OPEN DOSSIER →
           </Link>
         </>
       )}
