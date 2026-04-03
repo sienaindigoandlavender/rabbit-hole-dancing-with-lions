@@ -73,142 +73,139 @@ export default function MapClient({ points }: MapClientProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-paper">
-      <div className="flower-of-life" />
-
-      {/* Header — brand + search */}
-      <header
-        className="flex items-center justify-between"
-        style={{ padding: "26px 26px 0" }}
-      >
+    <div className="w-full h-screen overflow-hidden" style={{ background: "#111111" }}>
+      {/* Brand — floating top left */}
+      <div className="fixed z-50" style={{ top: "26px", left: "26px" }}>
         <Link
           href="/"
-          className="font-serif transition-colors duration-fast"
+          className="font-serif transition-colors duration-fast hover:text-amber"
           style={{
             fontSize: "16px",
             fontVariant: "small-caps",
             letterSpacing: "0.3em",
-            color: "#1a1a1a",
+            color: "#f5f0e8",
           }}
         >
           Dancing with Lions
         </Link>
-
-        <div className="relative">
-          {!searchOpen ? (
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="font-sans transition-colors duration-fast"
-              style={{
-                fontSize: "13px",
-                color: "#6b6860",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Search
-            </button>
-          ) : (
-            <div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSearch(searchQuery);
-                }}
-                className="flex items-center"
-                style={{ gap: "10px" }}
-              >
-                <span style={{ fontSize: "13px", color: "#c4613a", fontFamily: "monospace" }}>›</span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                  className="bg-transparent focus:outline-none"
-                  style={{
-                    fontSize: "13px",
-                    color: "#1a1a1a",
-                    fontFamily: "monospace",
-                    padding: "4px 0",
-                    width: "200px",
-                    border: "none",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                  style={{ fontSize: "13px", color: "#9b978f", background: "none", border: "none", cursor: "pointer" }}
-                >
-                  ×
-                </button>
-              </form>
-              {searchQuery.length >= 2 && (
-                <div
-                  className="absolute right-0"
-                  style={{
-                    marginTop: "6px",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    background: "#f7f5f0",
-                    border: "1px solid #e5e2db",
-                    borderRadius: "4px",
-                    padding: "6px 0",
-                    minWidth: "240px",
-                    boxShadow: "0 10px 26px rgba(120,100,80,0.1)",
-                  }}
-                >
-                  {searchResults.map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => {
-                        const flyTo = (window as unknown as Record<string, (lngLat: [number, number], zoom: number) => void>).__mapFlyTo;
-                        if (flyTo) flyTo([r.lng, r.lat], 14);
-                        setSearchOpen(false);
-                        setSearchQuery("");
-                      }}
-                      className="block w-full text-left transition-colors duration-fast hover:bg-paper-dark"
-                      style={{
-                        padding: "6px 16px",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "11px",
-                        fontFamily: "monospace",
-                        color: "#1a1a1a",
-                      }}
-                    >
-                      <span style={{ color: "#c4613a" }}>{r.city}</span>
-                      <span style={{ color: "#9b978f" }}> — </span>
-                      {r.title}
-                    </button>
-                  ))}
-                  {searchResults.length === 0 && (
-                    <p style={{ padding: "6px 16px", fontSize: "11px", fontFamily: "monospace", color: "#9b978f" }}>
-                      no results
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Map — transparent, bleeds into the warm page */}
-      <div style={{ padding: "0 26px 26px" }}>
-        <MapExplorer
-          points={points}
-          center={[20, 15]}
-          zoom={1.8}
-          showStyleToggle
-          showCoordinates
-          mapStyle="light"
-          transparent
-          className="w-full"
-          style={{ height: "calc(100vh - 80px)" }}
-        />
       </div>
+
+      {/* Search — floating top right */}
+      <div className="fixed z-50" style={{ top: "26px", right: "26px" }}>
+        {!searchOpen ? (
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="font-sans transition-colors duration-fast"
+            style={{
+              fontSize: "13px",
+              color: "#f5f0e8",
+              opacity: 0.6,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Search
+          </button>
+        ) : (
+          <div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch(searchQuery);
+              }}
+              className="flex items-center"
+              style={{ gap: "10px" }}
+            >
+              <span style={{ fontSize: "13px", color: "#d4a254", fontFamily: "monospace" }}>›</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                className="bg-transparent focus:outline-none"
+                style={{
+                  fontSize: "13px",
+                  color: "#f5f0e8",
+                  fontFamily: "monospace",
+                  padding: "4px 0",
+                  width: "200px",
+                  border: "none",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                style={{ fontSize: "13px", color: "#f5f0e8", opacity: 0.3, background: "none", border: "none", cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </form>
+            {searchQuery.length >= 2 && (
+              <div
+                className="absolute right-0"
+                style={{
+                  marginTop: "6px",
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                  background: "rgba(17,17,17,0.95)",
+                  border: "1px solid #2a2a2a",
+                  borderRadius: "4px",
+                  padding: "6px 0",
+                  minWidth: "240px",
+                  boxShadow: "0 10px 26px rgba(0,0,0,0.4)",
+                }}
+              >
+                {searchResults.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      const flyTo = (window as unknown as Record<string, (lngLat: [number, number], zoom: number) => void>).__mapFlyTo;
+                      if (flyTo) flyTo([r.lng, r.lat], 14);
+                      setSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="block w-full text-left transition-colors duration-fast"
+                    style={{
+                      padding: "6px 16px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "11px",
+                      fontFamily: "monospace",
+                      color: "#f5f0e8",
+                      opacity: 0.7,
+                    }}
+                  >
+                    <span style={{ color: "#d4a254" }}>{r.city}</span>
+                    <span style={{ opacity: 0.3 }}> — </span>
+                    {r.title}
+                  </button>
+                ))}
+                {searchResults.length === 0 && (
+                  <p style={{ padding: "6px 16px", fontSize: "11px", fontFamily: "monospace", color: "#f5f0e8", opacity: 0.3 }}>
+                    no results
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Map — full screen, edge to edge, immersive */}
+      <MapExplorer
+        points={points}
+        center={[20, 15]}
+        zoom={1.8}
+        showStyleToggle
+        showCoordinates
+        mapStyle="dark"
+        className="w-full h-screen"
+      />
+
+      {/* Flower of Life — dark */}
+      <div className="flower-of-life-dark" />
     </div>
   );
 }
