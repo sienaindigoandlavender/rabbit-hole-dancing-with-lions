@@ -17,8 +17,8 @@ interface MapExplorerProps {
 
 export default function MapExplorer({
   points,
-  center = [-6.5, 32.5],
-  zoom = 5.5,
+  center = [20, 15],
+  zoom = 2,
   interactive = true,
   showCard = true,
   className = "w-full h-screen",

@@ -159,11 +159,18 @@ export default function MapClient({ points }: MapClientProps) {
         )}
       </div>
 
-      {/* Map fills entire viewport — no header, no padding */}
-      <MapExplorer points={points} className="w-full h-screen" />
+      {/* Map — global view: centre [20, 15], zoom 2 */}
+      <MapExplorer points={points} center={[20, 15]} zoom={2} className="w-full h-screen" />
 
       {/* Flower of Life — dark */}
       <div className="flower-of-life-dark" />
+
+      {/* Counter — bottom left, countries not cities */}
+      <div className="fixed z-40" style={{ bottom: "26px", left: "26px" }}>
+        <span className="font-sans" style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}>
+          {points.length} secrets across {Array.from(new Set(points.map((p) => p.city))).length || 1} countries
+        </span>
+      </div>
     </div>
   );
 }
