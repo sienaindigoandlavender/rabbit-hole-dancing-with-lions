@@ -195,27 +195,19 @@ export default function MapClient({ points }: MapClientProps) {
         </div>
       </header>
 
-      {/* Map — framed on the warm page */}
-      <div style={{ padding: "26px" }}>
-        <div
-          style={{
-            borderRadius: "10px",
-            border: "1px solid #e5e2db",
-            overflow: "hidden",
-            boxShadow: "0 4px 26px rgba(120,100,80,0.06)",
-          }}
-        >
-          <MapExplorer
-            points={points}
-            center={[20, 15]}
-            zoom={1.8}
-            showStyleToggle
-            showCoordinates
-            mapStyle="light"
-            className="w-full"
-            style={{ height: "calc(100vh - 130px)" }}
-          />
-        </div>
+      {/* Map — transparent, bleeds into the warm page */}
+      <div style={{ padding: "0 26px 26px" }}>
+        <MapExplorer
+          points={points}
+          center={[20, 15]}
+          zoom={1.8}
+          showStyleToggle
+          showCoordinates
+          mapStyle="light"
+          transparent
+          className="w-full"
+          style={{ height: "calc(100vh - 80px)" }}
+        />
       </div>
     </div>
   );
