@@ -49,7 +49,7 @@ export default async function CityPage({ params }: CityPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-dark">
+    <div className="min-h-screen bg-dark overflow-y-auto h-screen">
       {/* Nav */}
       <nav className="px-6 py-4">
         <Link

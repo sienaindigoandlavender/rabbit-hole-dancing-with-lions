@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { DecoderPoint } from "@/app/lib/supabase";
-import { MAP_CONFIG, applyCustomStyle } from "@/app/lib/mapStyle";
 import PointCard from "./PointCard";
 
 interface MapExplorerProps {
@@ -18,52 +17,65 @@ interface MapExplorerProps {
 
 export default function MapExplorer({
   points,
-  center = MAP_CONFIG.defaultCenter,
-  zoom = MAP_CONFIG.defaultZoom,
+  center = [-6.5, 32.5],
+  zoom = 5.5,
   interactive = true,
   showCard = true,
   className = "w-full h-screen",
 }: MapExplorerProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<DecoderPoint | null>(null);
 
-  const flyToCity = useCallback(
-    (lat: number, lng: number) => {
-      map.current?.flyTo({
-        center: [lng, lat],
-        zoom: 12,
-        duration: 2000,
-        essential: true,
-      });
-    },
-    []
-  );
+  const closeCard = useCallback(() => setSelectedPoint(null), []);
+
+  const flyTo = useCallback((lngLat: [number, number], targetZoom: number) => {
+    mapRef.current?.flyTo({
+      center: lngLat,
+      zoom: targetZoom,
+      duration: 2000,
+      essential: true,
+    });
+  }, []);
+
+  // ESC to close card
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeCard();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [closeCard]);
+
+  // Expose flyTo for parent
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__mapFlyTo = flyTo;
+    return () => {
+      delete (window as unknown as Record<string, unknown>).__mapFlyTo;
+    };
+  }, [flyTo]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
-    const mapInstance = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: MAP_CONFIG.style,
-      center: center,
-      zoom: zoom,
-      maxZoom: MAP_CONFIG.maxZoom,
-      minZoom: MAP_CONFIG.minZoom,
-      attributionControl: true,
-      interactive: interactive,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center,
+      zoom,
+      maxZoom: 18,
+      minZoom: 2,
+      attributionControl: false,
+      interactive,
     });
 
-    map.current = mapInstance;
+    mapRef.current = map;
 
-    applyCustomStyle(mapInstance);
-
-    mapInstance.on("load", () => {
-      // Add point source as GeoJSON for clustering
-      mapInstance.addSource("points", {
+    map.on("load", () => {
+      // GeoJSON source with clustering
+      map.addSource("cultural-points", {
         type: "geojson",
         data: {
           type: "FeatureCollection",
@@ -75,156 +87,162 @@ export default function MapExplorer({
             },
             properties: {
               id: p.id,
-              title: p.title,
-              category: p.category,
               city: p.city,
+              title: p.title,
+              question: p.question,
+              answer: p.answer,
+              category: p.category,
+              darija_word: p.darija_word || "",
+              darija_meaning: p.darija_meaning || "",
+              darija_literal: p.darija_literal || "",
+              darija_context: p.darija_context || "",
             },
           })),
         },
         cluster: true,
-        clusterMaxZoom: 12,
+        clusterMaxZoom: 14,
         clusterRadius: 50,
       });
 
       // Cluster circles
-      mapInstance.addLayer({
+      map.addLayer({
         id: "clusters",
         type: "circle",
-        source: "points",
+        source: "cultural-points",
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#d4a254",
           "circle-radius": [
             "step",
             ["get", "point_count"],
-            16,
+            15,
             10,
-            22,
+            20,
             30,
-            28,
+            25,
           ],
-          "circle-opacity": 0.6,
+          "circle-color": "#d4a254",
+          "circle-opacity": 0.3,
           "circle-stroke-width": 1,
           "circle-stroke-color": "#d4a254",
-          "circle-stroke-opacity": 0.3,
+          "circle-stroke-opacity": 0.5,
         },
       });
 
       // Cluster count labels
-      mapInstance.addLayer({
+      map.addLayer({
         id: "cluster-count",
         type: "symbol",
-        source: "points",
+        source: "cultural-points",
         filter: ["has", "point_count"],
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
-          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"],
           "text-size": 12,
         },
         paint: {
-          "text-color": "#111111",
+          "text-color": "#f5f0e8",
         },
       });
 
-      // Click cluster to zoom
-      mapInstance.on("click", "clusters", (e) => {
-        const features = mapInstance.queryRenderedFeatures(e.point, {
+      // Unclustered point glow (outer stroke)
+      map.addLayer({
+        id: "unclustered-point",
+        type: "circle",
+        source: "cultural-points",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 6,
+          "circle-color": "#d4a254",
+          "circle-opacity": 0.9,
+          "circle-stroke-width": 8,
+          "circle-stroke-color": "#d4a254",
+          "circle-stroke-opacity": 0.15,
+        },
+      });
+
+      // Unclustered point bright centre
+      map.addLayer({
+        id: "unclustered-point-centre",
+        type: "circle",
+        source: "cultural-points",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 3,
+          "circle-color": "#f5e6c8",
+          "circle-opacity": 1,
+        },
+      });
+
+      // Click cluster → zoom in
+      map.on("click", "clusters", (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
           layers: ["clusters"],
         });
         if (!features.length) return;
         const clusterId = features[0].properties?.cluster_id;
-        const source = mapInstance.getSource("points") as mapboxgl.GeoJSONSource;
-        source.getClusterExpansionZoom(clusterId, (err, zoomLevel) => {
+        const source = map.getSource(
+          "cultural-points"
+        ) as mapboxgl.GeoJSONSource;
+        source.getClusterExpansionZoom(clusterId, (err, expansionZoom) => {
           if (err) return;
-          const geometry = features[0].geometry;
-          if (geometry.type === "Point") {
-            mapInstance.easeTo({
-              center: geometry.coordinates as [number, number],
-              zoom: zoomLevel || 12,
+          const geom = features[0].geometry;
+          if (geom.type === "Point") {
+            map.easeTo({
+              center: geom.coordinates as [number, number],
+              zoom: expansionZoom || 14,
             });
           }
         });
       });
 
-      // Cursor pointer on clusters
-      mapInstance.on("mouseenter", "clusters", () => {
-        mapInstance.getCanvas().style.cursor = "pointer";
+      // Click unclustered point → show card
+      map.on("click", "unclustered-point", (e) => {
+        if (!showCard || !e.features?.length) return;
+        const props = e.features[0].properties;
+        if (!props) return;
+
+        // Find the full point data to pass to card
+        const point = points.find((p) => p.id === props.id);
+        if (point) {
+          setSelectedPoint(point);
+        }
       });
-      mapInstance.on("mouseleave", "clusters", () => {
-        mapInstance.getCanvas().style.cursor = "";
+
+      // Click map background → close card
+      map.on("click", (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+          layers: ["unclustered-point", "clusters"],
+        });
+        if (features.length === 0) {
+          setSelectedPoint(null);
+        }
+      });
+
+      // Cursors
+      map.on("mouseenter", "unclustered-point", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "unclustered-point", () => {
+        map.getCanvas().style.cursor = "";
+      });
+      map.on("mouseenter", "clusters", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "clusters", () => {
+        map.getCanvas().style.cursor = "";
       });
     });
 
-    const updateMarkers = () => {
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = [];
-
-      points.forEach((point) => {
-        const el = document.createElement("div");
-        el.className = "marker-pulse";
-        el.style.width = "10px";
-        el.style.height = "10px";
-        el.style.borderRadius = "50%";
-        el.style.backgroundColor = "#d4a254";
-        el.style.boxShadow = "0 0 8px 3px rgba(212, 162, 84, 0.5)";
-        el.style.cursor = "pointer";
-        el.style.transition = "all 0.2s ease";
-
-        el.addEventListener("mouseenter", () => {
-          el.style.width = "14px";
-          el.style.height = "14px";
-          el.style.boxShadow = "0 0 12px 5px rgba(212, 162, 84, 0.8)";
-        });
-        el.addEventListener("mouseleave", () => {
-          el.style.width = "10px";
-          el.style.height = "10px";
-          el.style.boxShadow = "0 0 8px 3px rgba(212, 162, 84, 0.5)";
-        });
-
-        el.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (showCard) {
-            setSelectedPoint(point);
-          }
-          mapInstance.flyTo({
-            center: [point.lng, point.lat],
-            zoom: Math.max(mapInstance.getZoom(), 13),
-            duration: 1000,
-          });
-        });
-
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([point.lng, point.lat])
-          .addTo(mapInstance);
-
-        markersRef.current.push(marker);
-      });
-    };
-
-    mapInstance.on("load", updateMarkers);
-
     return () => {
-      markersRef.current.forEach((m) => m.remove());
-      mapInstance.remove();
+      map.remove();
     };
   }, [points, center, zoom, interactive, showCard]);
-
-  // Expose flyToCity for parent components
-  useEffect(() => {
-    (window as unknown as Record<string, unknown>).__mapFlyTo = flyToCity;
-    return () => {
-      delete (window as unknown as Record<string, unknown>).__mapFlyTo;
-    };
-  }, [flyToCity]);
 
   return (
     <div className="relative">
       <div ref={mapContainer} className={className} />
       {showCard && selectedPoint && (
-        <PointCard
-          point={selectedPoint}
-          onClose={() => setSelectedPoint(null)}
-        />
+        <PointCard point={selectedPoint} onClose={closeCard} />
       )}
     </div>
   );

@@ -105,7 +105,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-dark">
+    <div className="min-h-screen bg-dark overflow-y-auto h-screen">
       {/* Nav */}
       <nav className="px-6 py-4 flex items-center gap-4">
         <Link

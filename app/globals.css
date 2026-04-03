@@ -7,24 +7,40 @@ body {
   background-color: #111111;
   color: #f5f0e8;
   font-family: "DM Sans", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
+/* Slide in from right (desktop card) */
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%) translateY(-50%);
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.15);
+  to {
+    transform: translateX(0) translateY(-50%);
   }
 }
 
-.marker-pulse {
-  animation: pulse-glow 3s ease-in-out infinite;
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out forwards;
 }
 
+/* Slide up from bottom (mobile bottom sheet) */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.3s ease-out forwards;
+}
+
+/* Fade in for revealed content */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -40,15 +56,13 @@ body {
   animation: fadeIn 0.4s ease-out;
 }
 
+/* Hide Mapbox controls */
 .mapboxgl-ctrl-logo,
 .mapboxgl-ctrl-attrib {
-  opacity: 0.3 !important;
+  display: none !important;
 }
 
-.mapboxgl-ctrl-attrib a {
-  color: #f5f0e8 !important;
-}
-
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
 }

@@ -14,9 +14,14 @@ export default function HomeClient({ points }: HomeClientProps) {
   const totalCities = uniqueCities.size;
 
   const handleCityClick = (city: (typeof CITIES)[number]) => {
-    const flyTo = (window as unknown as Record<string, (lat: number, lng: number) => void>).__mapFlyTo;
+    const flyTo = (
+      window as unknown as Record<
+        string,
+        (lngLat: [number, number], zoom: number) => void
+      >
+    ).__mapFlyTo;
     if (flyTo) {
-      flyTo(city.lat, city.lng);
+      flyTo(city.center, city.zoom);
     }
   };
 
@@ -24,10 +29,19 @@ export default function HomeClient({ points }: HomeClientProps) {
     <div className="relative w-full h-screen overflow-hidden">
       <Navigation onCityClick={handleCityClick} />
       <MapExplorer points={points} />
-      <div className="fixed bottom-4 left-6 z-30">
-        <p className="font-sans text-xs text-cream/30">
+
+      {/* Bottom left — counter */}
+      <div className="fixed bottom-6 left-6 z-40 md:block hidden">
+        <span className="text-xs font-sans text-cream/40">
           {totalPoints} secrets across {totalCities} cities
-        </p>
+        </span>
+      </div>
+
+      {/* Mobile — bottom centre counter */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden">
+        <span className="text-xs font-sans text-cream/40">
+          {totalPoints} secrets across {totalCities} cities
+        </span>
       </div>
     </div>
   );

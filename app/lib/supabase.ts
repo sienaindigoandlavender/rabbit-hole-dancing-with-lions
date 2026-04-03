@@ -35,7 +35,9 @@ export interface DecoderTrail {
 export async function getAllPoints(): Promise<DecoderPoint[]> {
   const { data, error } = await supabase
     .from("decoder_points")
-    .select("*")
+    .select(
+      "id, city, title, question, answer, category, lat, lng, darija_word, darija_meaning, darija_literal, darija_context, trail, mj_prompt, hero_image"
+    )
     .order("city", { ascending: true });
 
   if (error) {
@@ -119,12 +121,12 @@ export function getCityFromSlug(slug: string): string {
 }
 
 export const CITIES = [
-  { name: "Marrakech", slug: "marrakech", lat: 31.6295, lng: -7.9811 },
-  { name: "Fes", slug: "fes", lat: 34.0331, lng: -5.0003 },
-  { name: "Essaouira", slug: "essaouira", lat: 31.5085, lng: -9.7595 },
-  { name: "Rabat", slug: "rabat", lat: 34.0209, lng: -6.8416 },
-  { name: "Tangier", slug: "tangier", lat: 35.7595, lng: -5.834 },
-  { name: "Casablanca", slug: "casablanca", lat: 33.5731, lng: -7.5898 },
-  { name: "Ouarzazate", slug: "ouarzazate", lat: 30.9189, lng: -6.8936 },
-  { name: "Agadir", slug: "agadir", lat: 30.4278, lng: -9.5981 },
+  { name: "Marrakech", slug: "marrakech", center: [-7.989, 31.629] as [number, number], zoom: 14 },
+  { name: "Fes", slug: "fes", center: [-4.974, 34.063] as [number, number], zoom: 14 },
+  { name: "Essaouira", slug: "essaouira", center: [-9.770, 31.513] as [number, number], zoom: 14 },
+  { name: "Rabat", slug: "rabat", center: [-6.832, 34.020] as [number, number], zoom: 13 },
+  { name: "Tangier", slug: "tangier", center: [-5.813, 35.785] as [number, number], zoom: 13 },
+  { name: "Casablanca", slug: "casablanca", center: [-7.619, 33.593] as [number, number], zoom: 13 },
+  { name: "Ouarzazate", slug: "ouarzazate", center: [-6.893, 30.920] as [number, number], zoom: 11 },
+  { name: "Agadir", slug: "agadir", center: [-9.598, 30.427] as [number, number], zoom: 13 },
 ];
