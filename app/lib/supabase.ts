@@ -23,6 +23,8 @@ export interface DecoderPoint {
   darija_context: string | null;
   mj_prompt: string | null;
   hero_image: string | null;
+  photo_url: string | null;
+  photo_credit: string | null;
 }
 
 export interface DecoderTrail {
@@ -39,7 +41,7 @@ export async function getAllPoints(): Promise<DecoderPoint[]> {
   const { data, error } = await supabase
     .from("decoder_points")
     .select(
-      "id, city, title, question, answer, category, lat, lng, darija_word, darija_meaning, darija_literal, darija_context, trail, mj_prompt, hero_image"
+      "id, city, title, question, answer, category, lat, lng, darija_word, darija_meaning, darija_literal, darija_context, trail, mj_prompt, hero_image, photo_url, photo_credit"
     )
     .order("city", { ascending: true });
 

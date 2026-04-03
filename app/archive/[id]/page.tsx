@@ -126,13 +126,33 @@ export default async function EntryPage({ params }: EntryPageProps) {
         ) : <span />}
       </div>
 
-      {/* Hero image */}
-      {point.hero_image && (
-        <div className="max-w-article mx-auto" style={{ padding: "0 26px", marginBottom: "42px" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={point.hero_image} alt={point.title} className="w-full h-auto" style={{ borderRadius: "4px" }} />
-        </div>
-      )}
+      {/* Photo — real photograph or satellite fallback */}
+      <div className="max-w-article mx-auto" style={{ padding: "0 26px", marginBottom: "42px" }}>
+        {point.photo_url ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={point.photo_url} alt={point.title} className="w-full h-auto" style={{ borderRadius: "4px" }} />
+            {point.photo_credit && (
+              <p className="font-sans" style={{ fontSize: "10px", color: "var(--text-tertiary)", marginTop: "6px" }}>
+                © {point.photo_credit}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://maps.googleapis.com/maps/api/staticmap?center=${point.lat},${point.lng}&zoom=16&size=900x556&maptype=satellite&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}`}
+              alt={`Satellite view of ${point.title}`}
+              className="w-full h-auto"
+              style={{ borderRadius: "4px" }}
+            />
+            <p className="font-sans" style={{ fontSize: "10px", color: "var(--text-tertiary)", marginTop: "6px" }}>
+              Satellite imagery · Google Maps
+            </p>
+          </>
+        )}
+      </div>
 
       {/* Entry content */}
       <article className="max-w-prose mx-auto" style={{ padding: "0 26px 110px" }}>
