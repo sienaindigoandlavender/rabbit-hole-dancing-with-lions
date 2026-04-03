@@ -14,9 +14,14 @@ export default function HomeClient({ points }: HomeClientProps) {
   const totalCities = uniqueCities.size;
 
   const handleCityClick = (city: (typeof CITIES)[number]) => {
-    const flyTo = (window as unknown as Record<string, (lat: number, lng: number) => void>).__mapFlyTo;
+    const flyTo = (
+      window as unknown as Record<
+        string,
+        (lngLat: [number, number], zoom: number) => void
+      >
+    ).__mapFlyTo;
     if (flyTo) {
-      flyTo(city.lat, city.lng);
+      flyTo(city.center, city.zoom);
     }
   };
 
@@ -24,10 +29,34 @@ export default function HomeClient({ points }: HomeClientProps) {
     <div className="relative w-full h-screen overflow-hidden">
       <Navigation onCityClick={handleCityClick} />
       <MapExplorer points={points} />
-      <div className="fixed bottom-4 left-6 z-30">
-        <p className="font-sans text-xs text-cream/30">
+
+      {/* Flower of Life overlay — sacred geometry watermark */}
+      <div className="flower-of-life-bg" />
+
+      {/* Bottom left — counter at phi position (desktop) */}
+      <div
+        className="fixed z-40 hidden md:block"
+        style={{ bottom: "26px", left: "26px" }}
+      >
+        <span
+          className="font-sans"
+          style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}
+        >
           {totalPoints} secrets across {totalCities} cities
-        </p>
+        </span>
+      </div>
+
+      {/* Mobile — bottom centre counter */}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 z-40 md:hidden"
+        style={{ bottom: "26px" }}
+      >
+        <span
+          className="font-sans"
+          style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}
+        >
+          {totalPoints} secrets across {totalCities} cities
+        </span>
       </div>
     </div>
   );

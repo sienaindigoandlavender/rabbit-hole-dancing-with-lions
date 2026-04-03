@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-dark flex flex-col">
+    <div className="min-h-screen bg-dark flex flex-col overflow-y-auto h-screen">
       <nav className="px-6 py-4">
         <Link
           href="/"

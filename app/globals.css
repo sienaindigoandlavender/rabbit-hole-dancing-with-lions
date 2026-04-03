@@ -7,28 +7,116 @@ body {
   background-color: #111111;
   color: #f5f0e8;
   font-family: "DM Sans", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-@keyframes pulse-glow {
+/* Sacred geometry: golden ratio line-height */
+p,
+.prose {
+  line-height: 1.618;
+}
+
+/* Phi easing curve */
+:root {
+  --ease-phi: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/*
+ * HERMETIC LAW III: VIBRATION
+ * "Nothing rests; everything moves; everything vibrates."
+ * The card breathes at the frequency of phi (2600ms cycle).
+ * The dots on the map pulse. Nothing on screen is truly still.
+ */
+@keyframes cardBreathe {
   0%,
   100% {
-    opacity: 0.5;
-    transform: scale(1);
+    box-shadow: 0 26px 68px rgba(0, 0, 0, 0.5);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.15);
+    box-shadow: 0 26px 68px rgba(0, 0, 0, 0.38);
   }
 }
 
-.marker-pulse {
-  animation: pulse-glow 3s ease-in-out infinite;
+.hermetic-vibration {
+  animation: cardBreathe 2600ms var(--ease-phi) infinite;
 }
 
-@keyframes fadeIn {
+/*
+ * HERMETIC LAW IV: POLARITY
+ * "Everything has its pair of opposites; opposites are identical in nature, but different in degree."
+ * Question dims as answer brightens — they are the same content at different degrees of revelation.
+ */
+@keyframes polarityDim {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+.hermetic-polarity-dim {
+  animation: polarityDim 400ms var(--ease-phi) forwards;
+}
+
+/*
+ * HERMETIC LAW V: RHYTHM
+ * "Everything flows, out and in; the pendulum swing manifests in everything."
+ * Staggered reveals follow Fibonacci intervals: 0, 200, 400, 600ms.
+ * Each element enters in rhythmic succession.
+ */
+.hermetic-rhythm-1 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 0ms forwards;
+}
+.hermetic-rhythm-2 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 200ms forwards;
+}
+.hermetic-rhythm-3 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 400ms forwards;
+}
+.hermetic-rhythm-4 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 600ms forwards;
+}
+
+/* Slide in from right — desktop card at phi vertical (38.2%) */
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%) translateY(-38.2%);
+  }
+  to {
+    transform: translateX(0) translateY(-38.2%);
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 400ms var(--ease-phi) forwards;
+}
+
+/* Slide up from bottom — mobile bottom sheet */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 400ms var(--ease-phi) forwards;
+}
+
+/* Fade in for revealed answer */
+@keyframes fadeInAnswer {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -36,19 +124,44 @@ body {
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out;
+.animate-fadeIn-answer {
+  animation: fadeInAnswer 600ms var(--ease-phi) forwards;
 }
 
+/* Staggered fade in for darija box (200ms delay) */
+.animate-fadeIn-darija {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 200ms forwards;
+}
+
+/* Staggered fade in for story link (400ms delay after answer) */
+.animate-fadeIn-link {
+  opacity: 0;
+  animation: fadeInAnswer 400ms var(--ease-phi) 400ms forwards;
+}
+
+/* Flower of Life overlay */
+.flower-of-life-bg {
+  background-image: url("/flower-of-life.svg");
+  background-repeat: repeat;
+  background-size: 200px;
+  opacity: 0.015;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Hide Mapbox controls */
 .mapboxgl-ctrl-logo,
 .mapboxgl-ctrl-attrib {
-  opacity: 0.3 !important;
+  display: none !important;
 }
 
-.mapboxgl-ctrl-attrib a {
-  color: #f5f0e8 !important;
-}
-
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
 }

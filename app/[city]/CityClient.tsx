@@ -7,7 +7,7 @@ import MapExplorer from "@/app/components/MapExplorer";
 interface CityClientProps {
   points: DecoderPoint[];
   trails: DecoderTrail[];
-  cityInfo: { lat: number; lng: number };
+  cityInfo: { center: [number, number]; zoom: number };
   citySlug: string;
 }
 
@@ -24,8 +24,8 @@ export default function CityClient({
         <div className="rounded-lg overflow-hidden border border-border">
           <MapExplorer
             points={points}
-            center={[cityInfo.lng, cityInfo.lat]}
-            zoom={12}
+            center={cityInfo.center}
+            zoom={cityInfo.zoom}
             showCard={false}
             className="w-full h-[400px]"
           />

@@ -9,28 +9,63 @@ interface NavigationProps {
 
 export default function Navigation({ onCityClick }: NavigationProps) {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 pointer-events-none">
-      <Link
-        href="/"
-        className="font-serif text-xl text-cream pointer-events-auto hover:text-amber transition-colors"
+    <>
+      {/* Top left — Brand at phi position */}
+      <div className="fixed z-40" style={{ top: "26px", left: "26px" }}>
+        <Link
+          href="/"
+          className="font-serif text-cream hover:text-amber transition-colors duration-fast"
+          style={{ fontSize: "20px" }}
+        >
+          Dancing with Lions
+        </Link>
+      </div>
+
+      {/* Top right — City pills (desktop) at phi spacing */}
+      <div
+        className="hidden md:flex fixed z-40"
+        style={{ top: "26px", right: "26px", gap: "26px" }}
       >
-        Dancing with Lions
-      </Link>
-      <div className="hidden md:flex items-center gap-1 pointer-events-auto">
-        {CITIES.map((city, i) => (
-          <span key={city.slug} className="flex items-center">
+        {CITIES.map((city) => (
+          <button
+            key={city.slug}
+            onClick={() => onCityClick?.(city)}
+            className="font-sans text-cream/60 hover:text-cream transition-colors duration-fast"
+            style={{
+              fontSize: "10px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            {city.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile — scrollable pills below brand */}
+      <div
+        className="md:hidden fixed left-0 right-0 z-40 overflow-x-auto"
+        style={{ top: "58px", paddingLeft: "26px", paddingRight: "26px" }}
+      >
+        <div className="flex whitespace-nowrap pb-2" style={{ gap: "26px" }}>
+          {CITIES.map((city) => (
             <button
+              key={city.slug}
               onClick={() => onCityClick?.(city)}
-              className="text-sm text-cream/70 hover:text-cream transition-colors font-sans"
+              className="font-sans text-cream/60 hover:text-cream transition-colors duration-fast flex-shrink-0"
+              style={{
+                fontSize: "10px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
             >
               {city.name}
             </button>
-            {i < CITIES.length - 1 && (
-              <span className="text-cream/30 mx-1">·</span>
-            )}
-          </span>
-        ))}
+          ))}
+        </div>
       </div>
-    </nav>
+    </>
   );
 }
