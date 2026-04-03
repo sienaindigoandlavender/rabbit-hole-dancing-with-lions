@@ -37,17 +37,32 @@ export default function StoryLayout({
         {point.question}
       </blockquote>
 
-      {/* Hero image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {point.hero_image && (
-        <div className="my-8 rounded-lg overflow-hidden">
-          <img
-            src={point.hero_image}
-            alt={point.title}
-            className="w-full h-auto"
-          />
-        </div>
-      )}
+      {/* Photo — real or satellite fallback */}
+      <div className="my-8 rounded-lg overflow-hidden">
+        {point.photo_url ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={point.photo_url} alt={point.title} className="w-full h-auto" />
+            {point.photo_credit && (
+              <p className="font-sans" style={{ fontSize: "10px", color: "var(--text-tertiary)", marginTop: "6px" }}>
+                © {point.photo_credit}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://maps.googleapis.com/maps/api/staticmap?center=${point.lat},${point.lng}&zoom=16&size=900x556&maptype=satellite&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}`}
+              alt={`Satellite view of ${point.title}`}
+              className="w-full h-auto"
+            />
+            <p className="font-sans" style={{ fontSize: "10px", color: "var(--text-tertiary)", marginTop: "6px" }}>
+              Satellite imagery · Google Maps
+            </p>
+          </>
+        )}
+      </div>
 
       {/* Answer as highlighted block */}
       <div className="bg-card border-l-[3px] border-terracotta p-6 my-8 rounded-r-lg">

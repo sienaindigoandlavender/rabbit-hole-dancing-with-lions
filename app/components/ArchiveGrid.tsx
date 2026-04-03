@@ -38,12 +38,12 @@ export default function ArchiveGrid({ points }: ArchiveGridProps) {
             animation: `gridFadeIn 600ms var(--ease-phi) ${Math.min(index * 100, 1000)}ms both`,
           }}
         >
-          {/* Hero image placeholder */}
-          {point.hero_image && (
+          {/* Photo — real photograph if available */}
+          {point.photo_url && (
             <div className="overflow-hidden" style={{ borderRadius: "4px", marginBottom: "10px" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={point.hero_image}
+                src={point.photo_url}
                 alt={point.title}
                 className="w-full h-auto transition-opacity duration-fast group-hover:opacity-100"
                 style={{ opacity: 0.9 }}
