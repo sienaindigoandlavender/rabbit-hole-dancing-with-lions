@@ -23,6 +23,67 @@ p,
   --ease-phi: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/*
+ * HERMETIC LAW III: VIBRATION
+ * "Nothing rests; everything moves; everything vibrates."
+ * The card breathes at the frequency of phi (2600ms cycle).
+ * The dots on the map pulse. Nothing on screen is truly still.
+ */
+@keyframes cardBreathe {
+  0%,
+  100% {
+    box-shadow: 0 26px 68px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 26px 68px rgba(0, 0, 0, 0.38);
+  }
+}
+
+.hermetic-vibration {
+  animation: cardBreathe 2600ms var(--ease-phi) infinite;
+}
+
+/*
+ * HERMETIC LAW IV: POLARITY
+ * "Everything has its pair of opposites; opposites are identical in nature, but different in degree."
+ * Question dims as answer brightens — they are the same content at different degrees of revelation.
+ */
+@keyframes polarityDim {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+.hermetic-polarity-dim {
+  animation: polarityDim 400ms var(--ease-phi) forwards;
+}
+
+/*
+ * HERMETIC LAW V: RHYTHM
+ * "Everything flows, out and in; the pendulum swing manifests in everything."
+ * Staggered reveals follow Fibonacci intervals: 0, 200, 400, 600ms.
+ * Each element enters in rhythmic succession.
+ */
+.hermetic-rhythm-1 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 0ms forwards;
+}
+.hermetic-rhythm-2 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 200ms forwards;
+}
+.hermetic-rhythm-3 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 400ms forwards;
+}
+.hermetic-rhythm-4 {
+  opacity: 0;
+  animation: fadeInAnswer 600ms var(--ease-phi) 600ms forwards;
+}
+
 /* Slide in from right — desktop card at phi vertical (38.2%) */
 @keyframes slideInRight {
   from {

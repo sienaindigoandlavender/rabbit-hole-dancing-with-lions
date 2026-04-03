@@ -27,9 +27,15 @@ export default function PointCard({ point, onClose }: PointCardProps) {
 
   return (
     <>
-      {/* Desktop: golden rectangle card at phi vertical line (38.2% from top) */}
+      {/*
+        * HERMETIC LAW I: MENTALISM — "The All is Mind"
+        * The card is a thought-form. It exists only when attention is given to a point.
+        * HERMETIC LAW III: VIBRATION — the card breathes via hermetic-vibration class.
+        * HERMETIC LAW II: CORRESPONDENCE — desktop/mobile are "as above, so below".
+        */}
       <div
-        className={`hidden md:block fixed z-50 overflow-y-auto transition-transform duration-base ease-phi ${closing ? "translate-x-[120%]" : "animate-slideInRight"}`}
+        data-hermetic="mentalism,vibration,correspondence"
+        className={`hidden md:block fixed z-50 overflow-y-auto transition-transform duration-base ease-phi hermetic-vibration ${closing ? "translate-x-[120%]" : "animate-slideInRight"}`}
         style={{
           right: "26px",
           top: "38.2%",
@@ -52,9 +58,10 @@ export default function PointCard({ point, onClose }: PointCardProps) {
         />
       </div>
 
-      {/* Mobile: bottom sheet at phi height (38.2vh) */}
+      {/* Mobile: CORRESPONDENCE — "As above, so below" — mirrors desktop card */}
       <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 overflow-y-auto transition-transform duration-base ease-phi ${closing ? "translate-y-full" : "animate-slideInUp"}`}
+        data-hermetic="correspondence,vibration"
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 overflow-y-auto transition-transform duration-base ease-phi hermetic-vibration ${closing ? "translate-y-full" : "animate-slideInUp"}`}
         style={{
           height: "38.2vh",
           background: "#1a1a1a",
@@ -116,25 +123,38 @@ function CardContent({
         {point.title}
       </h2>
 
-      {/* Question — phi lg (20px) with golden line-height */}
+      {/*
+        * HERMETIC LAW IV: POLARITY
+        * Question and answer are the same substance at different degrees of revelation.
+        * As the answer brightens, the question dims — opposites in unity.
+        */}
       <p
-        className="font-serif italic"
+        className={`font-serif italic ${revealed ? "hermetic-polarity-dim" : ""}`}
+        data-hermetic="polarity"
         style={{
           fontSize: "20px",
           lineHeight: "1.618",
           marginTop: "26px",
           color: "#f5f0e8",
-          opacity: revealed ? 0.5 : 0.85,
-          transition: "opacity 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          opacity: revealed ? undefined : 0.85,
         }}
       >
         {point.question}
       </p>
 
       {/* Reveal button or revealed content */}
+      {/*
+        * HERMETIC LAW VI: CAUSE AND EFFECT
+        * Every click produces a specific response. Nothing is random.
+        * The reveal button is the cause; the answer cascade is the effect.
+        *
+        * HERMETIC LAW V: RHYTHM
+        * Elements enter in Fibonacci-staggered intervals: 0, 200, 400, 600ms.
+        */}
       {!revealed ? (
         <button
           onClick={onReveal}
+          data-hermetic="cause-and-effect"
           className="font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
           style={{
             fontSize: "13px",
@@ -148,8 +168,8 @@ function CardContent({
         </button>
       ) : (
         <>
-          {/* Answer — phi base (16px) with golden line-height */}
-          <div className="animate-fadeIn-answer">
+          {/* RHYTHM beat 1: Answer (0ms delay) */}
+          <div className="hermetic-rhythm-1" data-hermetic="rhythm">
             <p
               className="font-sans"
               style={{
@@ -164,10 +184,11 @@ function CardContent({
             </p>
           </div>
 
-          {/* Darija box — staggered 200ms after answer */}
+          {/* RHYTHM beat 2: Darija box (200ms delay) */}
           {point.darija_word && (
             <div
-              className="animate-fadeIn-darija"
+              className="hermetic-rhythm-2"
+              data-hermetic="rhythm,gender"
               style={{
                 marginTop: "42px",
                 padding: "26px",
@@ -176,6 +197,12 @@ function CardContent({
                 borderLeft: "3px solid #c4613a",
               }}
             >
+              {/*
+                * HERMETIC LAW VII: GENDER
+                * "Gender is in everything." Serif (receptive) + Sans (active)
+                * coexist in the Darija box — the word in EB Garamond, the
+                * meaning in DM Sans.
+                */}
               <span
                 className="font-serif text-amber"
                 style={{ fontSize: "26px" }}
@@ -224,10 +251,11 @@ function CardContent({
             </div>
           )}
 
-          {/* Read full story — staggered 400ms */}
+          {/* RHYTHM beat 3: Story link (400ms delay) */}
           <Link
             href={`/${citySlug}/${point.id}`}
-            className="animate-fadeIn-link font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
+            className="hermetic-rhythm-3 font-sans text-amber hover:text-amber/80 transition-colors duration-fast"
+            data-hermetic="rhythm"
             style={{
               display: "block",
               marginTop: "42px",
