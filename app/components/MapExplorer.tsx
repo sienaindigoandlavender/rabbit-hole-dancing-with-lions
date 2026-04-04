@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, CSSProperties } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, CSSProperties } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { DecoderPoint } from "@/app/lib/supabase";
@@ -15,7 +15,6 @@ const STYLES = {
 const PAGE_BG = "#f7f5f0";
 
 function applyTransparentStyle(map: mapboxgl.Map) {
-  // Make water and background match the page
   const style = map.getStyle();
   if (!style) return;
   style.layers.forEach((layer) => {
@@ -23,20 +22,12 @@ function applyTransparentStyle(map: mapboxgl.Map) {
       map.setPaintProperty("background", "background-color", PAGE_BG);
     }
     if (layer.id === "water" || layer.id.startsWith("water")) {
-      if (layer.type === "fill") {
-        map.setPaintProperty(layer.id, "fill-color", "#e8e5de");
-      }
+      if (layer.type === "fill") map.setPaintProperty(layer.id, "fill-color", "#e8e5de");
     }
-    // Soften land boundaries
     if (layer.id.includes("boundary") || layer.id.includes("admin")) {
-      if (layer.type === "line") {
-        map.setPaintProperty(layer.id, "line-opacity", 0.15);
-      }
+      if (layer.type === "line") map.setPaintProperty(layer.id, "line-opacity", 0.15);
     }
-    // Soften labels
-    if (layer.type === "symbol") {
-      map.setPaintProperty(layer.id, "text-opacity", 0.4);
-    }
+    if (layer.type === "symbol") map.setPaintProperty(layer.id, "text-opacity", 0.4);
   });
 }
 
@@ -81,15 +72,13 @@ export default function MapExplorer({
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const pulseRef = useRef<number>(0);
+  const threadPulseRef = useRef<number>(0);
   const [selectedPoint, setSelectedPoint] = useState<DecoderPoint | null>(null);
   const [isSatellite, setIsSatellite] = useState(false);
+  const [manualSatellite, setManualSatellite] = useState<boolean | null>(null);
   const [cursorCoords, setCursorCoords] = useState("");
   const [hoverInfo, setHoverInfo] = useState<{
-    x: number;
-    y: number;
-    archiveNum: string;
-    city: string;
-    question: string;
+    x: number; y: number; archiveNum: string; city: string; question: string;
   } | null>(null);
 
   const closeCard = useCallback(() => setSelectedPoint(null), []);
@@ -109,16 +98,40 @@ export default function MapExplorer({
     return () => { delete (window as unknown as Record<string, unknown>).__mapFlyTo; };
   }, [flyTo]);
 
+  // Build thread line data from points sharing the same trail
+  const threadLines = useMemo(() => {
+    const trailGroups: Record<string, DecoderPoint[]> = {};
+    points.forEach((p) => {
+      if (p.trail) {
+        if (!trailGroups[p.trail]) trailGroups[p.trail] = [];
+        trailGroups[p.trail].push(p);
+      }
+    });
+    const features: GeoJSON.Feature[] = [];
+    Object.values(trailGroups).forEach((group) => {
+      for (let i = 0; i < group.length - 1; i++) {
+        features.push({
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [group[i].lng, group[i].lat],
+              [group[i + 1].lng, group[i + 1].lat],
+            ],
+          },
+          properties: { trail: group[i].trail },
+        });
+      }
+    });
+    return { type: "FeatureCollection" as const, features };
+  }, [points]);
+
   const addPointLayers = useCallback((map: mapboxgl.Map) => {
     if (map.getSource("cultural-points")) return;
 
-    console.log(`[DWL Map] Adding ${points.length} points to map`);
     const validPoints = points.filter((p) => p.lat && p.lng);
-    console.log(`[DWL Map] ${validPoints.length} points have valid lat/lng`);
-    if (validPoints.length > 0) {
-      console.log("[DWL Map] First point coords:", validPoints[0].lat, validPoints[0].lng);
-    }
 
+    // === POINTS SOURCE ===
     map.addSource("cultural-points", {
       type: "geojson",
       data: {
@@ -135,21 +148,26 @@ export default function MapExplorer({
         })),
       },
       cluster: true,
-      clusterMaxZoom: 14,
+      clusterMaxZoom: 6,
       clusterRadius: 50,
     });
 
-    // Clusters — soft glow, not buttons
+    // === THREAD LINES SOURCE ===
+    map.addSource("thread-lines", {
+      type: "geojson",
+      data: threadLines,
+    });
+
+    // === ZOOM 1-3: CLUSTERS ONLY ===
     map.addLayer({
       id: "clusters", type: "circle", source: "cultural-points",
       filter: ["has", "point_count"],
       paint: {
-        "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 30, 25],
+        "circle-radius": ["step", ["get", "point_count"], 12, 10, 18, 30, 24],
         "circle-color": "#d4a254", "circle-opacity": 0.15,
         "circle-stroke-width": 1, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.3,
       },
     });
-
     map.addLayer({
       id: "cluster-count", type: "symbol", source: "cultural-points",
       filter: ["has", "point_count"],
@@ -157,7 +175,32 @@ export default function MapExplorer({
       paint: { "text-color": "#d4a254", "text-opacity": 0.6 },
     });
 
-    // Breathing pulse ring — expands 8→16px and fades over 2600ms
+    // === ZOOM 4+: THREAD LINES (faint at 4-6, stronger at 7+) ===
+    map.addLayer({
+      id: "thread-lines-bg", type: "line", source: "thread-lines",
+      minzoom: 4,
+      paint: {
+        "line-color": "#d4a254",
+        "line-width": 1,
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.08, 7, 0.2, 10, 0.35],
+      },
+      layout: { "line-cap": "round" },
+    });
+    // Animated dash overlay — the "data pulse" travelling along threads
+    map.addLayer({
+      id: "thread-lines-pulse", type: "line", source: "thread-lines",
+      minzoom: 4,
+      paint: {
+        "line-color": "#d4a254",
+        "line-width": 2,
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.1, 7, 0.3, 10, 0.5],
+        "line-dasharray": [0, 4, 3],
+      },
+      layout: { "line-cap": "round" },
+    });
+
+    // === ZOOM 4+: INDIVIDUAL DOTS ===
+    // Breathing pulse ring
     map.addLayer({
       id: "point-glow", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
@@ -166,38 +209,97 @@ export default function MapExplorer({
         "circle-stroke-width": 1.5, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.4,
       },
     });
-
-    // Amber dot — 8px, bright, the most alive thing on screen
+    // Main dot
     map.addLayer({
       id: "unclustered-point", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-radius": 4, "circle-color": "#d4a254", "circle-opacity": 0.95,
-        "circle-stroke-width": 6, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.15,
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 3, 7, 4, 11, 6],
+        "circle-color": "#d4a254", "circle-opacity": 0.95,
+        "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 2, 3, 7, 6, 11, 8],
+        "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.15,
       },
     });
-
-    // Bright centre — hot core
+    // Hot centre
     map.addLayer({
       id: "unclustered-point-centre", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
-      paint: { "circle-radius": 2, "circle-color": "#f5e6c8", "circle-opacity": 1 },
+      paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1.5, 7, 2, 11, 3],
+        "circle-color": "#f5e6c8", "circle-opacity": 1,
+      },
     });
 
-    // Breathing pulse — ring expands from 8 to 16px, fades as it grows
+    // === ZOOM 7+: TITLE LABELS beside dots ===
+    map.addLayer({
+      id: "point-labels", type: "symbol", source: "cultural-points",
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 7,
+      layout: {
+        "text-field": ["get", "title"],
+        "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 7, 9, 11, 11],
+        "text-offset": [1, 0],
+        "text-anchor": "left",
+        "text-max-width": 12,
+      },
+      paint: {
+        "text-color": "#f5f0e8",
+        "text-opacity": ["interpolate", ["linear"], ["zoom"], 7, 0.3, 9, 0.5, 11, 0.7],
+        "text-halo-color": "#111111",
+        "text-halo-width": 1,
+      },
+    });
+
+    // === ZOOM 11+: QUESTION TEXT below title ===
+    map.addLayer({
+      id: "point-questions", type: "symbol", source: "cultural-points",
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 11,
+      layout: {
+        "text-field": ["get", "question"],
+        "text-font": ["DIN Pro Regular", "Arial Unicode MS Regular"],
+        "text-size": 9,
+        "text-offset": [1, 1.5],
+        "text-anchor": "left",
+        "text-max-width": 18,
+      },
+      paint: {
+        "text-color": "#f5f0e8",
+        "text-opacity": 0.4,
+        "text-halo-color": "#111111",
+        "text-halo-width": 1,
+      },
+    });
+
+    // === ANIMATIONS ===
+    // Dot pulse
     const animatePulse = () => {
       if (!map.getLayer("point-glow")) return;
       const t = (Date.now() % 2600) / 2600;
-      const radius = 8 + t * 8; // 8px → 16px
-      const opacity = 0.4 * (1 - t); // fades to 0 as it expands
+      const radius = 8 + t * 8;
+      const opacity = 0.4 * (1 - t);
       map.setPaintProperty("point-glow", "circle-stroke-opacity", opacity);
       map.setPaintProperty("point-glow", "circle-radius", radius);
       pulseRef.current = requestAnimationFrame(animatePulse);
     };
     pulseRef.current = requestAnimationFrame(animatePulse);
-  }, [points]);
+
+    // Thread line pulse — dash offset animates to create data-travelling effect
+    let dashStep = 0;
+    const animateThreads = () => {
+      if (!map.getLayer("thread-lines-pulse")) return;
+      dashStep = (dashStep + 0.15) % 7;
+      map.setPaintProperty("thread-lines-pulse", "line-dasharray", [
+        0, 4 + dashStep, 3 - Math.min(dashStep, 2.5),
+      ]);
+      threadPulseRef.current = requestAnimationFrame(animateThreads);
+    };
+    threadPulseRef.current = requestAnimationFrame(animateThreads);
+  }, [points, threadLines]);
 
   const bindEvents = useCallback((map: mapboxgl.Map) => {
+    // Cluster click → zoom
     map.on("click", "clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
       if (!features.length) return;
@@ -206,10 +308,11 @@ export default function MapExplorer({
       source.getClusterExpansionZoom(clusterId, (err, z) => {
         if (err) return;
         const geom = features[0].geometry;
-        if (geom.type === "Point") map.easeTo({ center: geom.coordinates as [number, number], zoom: z || 14 });
+        if (geom.type === "Point") map.easeTo({ center: geom.coordinates as [number, number], zoom: z || 7 });
       });
     });
 
+    // Dot click → card
     map.on("click", "unclustered-point", (e) => {
       if (!showCard || !e.features?.length) return;
       const props = e.features[0].properties;
@@ -218,6 +321,7 @@ export default function MapExplorer({
       if (p) { setSelectedPoint(p); setHoverInfo(null); }
     });
 
+    // Background click → close
     map.on("click", (e) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ["unclustered-point", "clusters"] });
       if (features.length === 0) setSelectedPoint(null);
@@ -242,11 +346,43 @@ export default function MapExplorer({
     map.on("mouseenter", "clusters", () => { map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", "clusters", () => { map.getCanvas().style.cursor = ""; });
 
+    // Live coordinates
     if (showCoordinates) {
       map.on("mousemove", (e) => setCursorCoords(formatCoord(e.lngLat.lat, e.lngLat.lng)));
     }
-  }, [points, showCard, showCoordinates]);
 
+    // === AUTO-SATELLITE at zoom 11+ ===
+    map.on("zoomend", () => {
+      const z = map.getZoom();
+      if (manualSatellite !== null) return; // user manually toggled, don't override
+      if (z >= 11 && !isSatellite) {
+        setIsSatellite(true);
+        const c = map.getCenter();
+        cancelAnimationFrame(pulseRef.current);
+        cancelAnimationFrame(threadPulseRef.current);
+        map.setStyle(STYLES.satellite);
+        map.once("style.load", () => {
+          map.setCenter(c);
+          map.setZoom(z);
+          addPointLayers(map);
+        });
+      } else if (z < 11 && isSatellite && manualSatellite === null) {
+        setIsSatellite(false);
+        const c = map.getCenter();
+        cancelAnimationFrame(pulseRef.current);
+        cancelAnimationFrame(threadPulseRef.current);
+        map.setStyle(STYLES[mapStyle]);
+        map.once("style.load", () => {
+          map.setCenter(c);
+          map.setZoom(z);
+          if (transparent) applyTransparentStyle(map);
+          addPointLayers(map);
+        });
+      }
+    });
+  }, [points, showCard, showCoordinates, isSatellite, manualSatellite, mapStyle, transparent, addPointLayers]);
+
+  // Init map
   useEffect(() => {
     if (!mapContainer.current) return;
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
@@ -263,31 +399,34 @@ export default function MapExplorer({
 
     mapRef.current = map;
     map.on("load", () => {
-      if (transparent) {
-        applyTransparentStyle(map);
-      }
+      if (transparent) applyTransparentStyle(map);
       addPointLayers(map);
       bindEvents(map);
     });
 
-    return () => { cancelAnimationFrame(pulseRef.current); map.remove(); };
+    return () => {
+      cancelAnimationFrame(pulseRef.current);
+      cancelAnimationFrame(threadPulseRef.current);
+      map.remove();
+    };
   }, [points, center, zoom, interactive, showCard, mapStyle, transparent, addPointLayers, bindEvents]);
 
+  // Manual toggle
   const toggleStyle = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
     const newSat = !isSatellite;
     setIsSatellite(newSat);
+    setManualSatellite(newSat);
     const currentCenter = map.getCenter();
     const currentZoom = map.getZoom();
     cancelAnimationFrame(pulseRef.current);
+    cancelAnimationFrame(threadPulseRef.current);
     map.setStyle(newSat ? STYLES.satellite : STYLES[mapStyle]);
     map.once("style.load", () => {
       map.setCenter(currentCenter);
       map.setZoom(currentZoom);
-      if (!newSat && transparent) {
-        applyTransparentStyle(map);
-      }
+      if (!newSat && transparent) applyTransparentStyle(map);
       addPointLayers(map);
     });
   }, [isSatellite, mapStyle, transparent, addPointLayers]);
@@ -302,16 +441,15 @@ export default function MapExplorer({
           className="absolute pointer-events-none z-40"
           style={{
             left: hoverInfo.x + 16, top: hoverInfo.y - 10,
-            background: "rgba(247,245,240,0.95)", border: "1px solid #e5e2db",
+            background: "rgba(17,17,17,0.88)", border: "1px solid rgba(212,162,84,0.15)",
             borderRadius: "4px", padding: "10px 16px", maxWidth: "280px",
-            boxShadow: "0 4px 16px rgba(120,100,80,0.1)",
           }}
         >
           <div className="flex items-center" style={{ gap: "10px", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10px", color: "#c4613a", fontFamily: "monospace" }}>{hoverInfo.archiveNum}</span>
-            <span style={{ fontSize: "10px", color: "#9b978f" }}>{hoverInfo.city}</span>
+            <span style={{ fontSize: "10px", color: "#d4a254", fontFamily: "monospace" }}>{hoverInfo.archiveNum}</span>
+            <span style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.4 }}>{hoverInfo.city}</span>
           </div>
-          <p style={{ fontSize: "11px", color: "#1a1a1a", opacity: 0.7, lineHeight: "1.4", fontFamily: "monospace" }}>
+          <p style={{ fontSize: "11px", color: "#f5f0e8", opacity: 0.7, lineHeight: "1.4", fontFamily: "monospace" }}>
             {hoverInfo.question}
           </p>
         </div>
@@ -320,7 +458,7 @@ export default function MapExplorer({
       {/* Coordinates */}
       {showCoordinates && cursorCoords && (
         <div className="absolute z-40 pointer-events-none" style={{ bottom: "16px", left: "16px" }}>
-          <span style={{ fontSize: "10px", color: "#6b6860", opacity: 0.5, fontFamily: "monospace" }}>
+          <span style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.35, fontFamily: "monospace" }}>
             {cursorCoords}
           </span>
         </div>
@@ -328,7 +466,7 @@ export default function MapExplorer({
 
       {showCard && selectedPoint && <PointCard point={selectedPoint} onClose={closeCard} />}
 
-      {/* Satellite toggle — text only */}
+      {/* SAT / MAP toggle */}
       {showStyleToggle && (
         <button
           onClick={toggleStyle}
@@ -339,8 +477,6 @@ export default function MapExplorer({
             fontSize: "10px", color: "#f5f0e8", opacity: 0.4,
             letterSpacing: "0.05em",
           }}
-          title={isSatellite ? "Switch to map" : "Switch to satellite"}
-          aria-label="Toggle map style"
         >
           {isSatellite ? "MAP" : "SAT"}
         </button>
