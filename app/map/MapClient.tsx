@@ -72,6 +72,16 @@ export default function MapClient({ points }: MapClientProps) {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
+  // Client-side debug: log points received from server
+  useEffect(() => {
+    console.log(`[DWL Client] MapClient received ${points.length} points`);
+    if (points.length > 0) {
+      console.log("[DWL Client] First point:", points[0].id, points[0].title, "lat:", points[0].lat, "lng:", points[0].lng);
+    } else {
+      console.log("[DWL Client] No points received — check Vercel env vars and Supabase RLS");
+    }
+  }, [points]);
+
   return (
     <div className="w-full h-screen overflow-hidden" style={{ background: "#111111" }}>
       {/* Brand — floating top left */}
