@@ -229,7 +229,7 @@ function CardContent({
 
           {/* Read full entry */}
           <Link
-            href={`/archive/${point.id}`}
+            href={`/dossiers/${point.id}`}
             className="hermetic-rhythm-3 font-sans text-terracotta hover:text-terracotta/80 transition-colors duration-fast uppercase"
             style={{ display: "block", marginTop: "42px", fontSize: "10px", letterSpacing: "0.15em" }}
           >

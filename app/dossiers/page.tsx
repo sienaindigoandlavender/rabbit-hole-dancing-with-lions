@@ -5,11 +5,11 @@ import ArchiveHome from "../ArchiveHome";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Archive — Dancing with Lions",
-  description: "Browse the full archive of hidden knowledge. Every entry is a person. Every story is true.",
+  title: "Cultural Dossiers — Dancing with Lions",
+  description: "Explore cultural dossiers connecting real people and real places across the globe.",
 };
 
-export default async function ArchivePage() {
+export default async function DossiersPage() {
   const points = await getAllPoints();
   const shuffled = [...points].sort(() => Math.random() - 0.5);
   return <ArchiveHome points={shuffled} />;
