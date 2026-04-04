@@ -32,7 +32,7 @@ export default function ArchiveGrid({ points }: ArchiveGridProps) {
       {points.map((point, index) => (
         <Link
           key={point.id}
-          href={`/archive/${point.id}`}
+          href={`/dossiers/${point.id}`}
           className="block group"
           style={{
             animation: `gridFadeIn 600ms var(--ease-phi) ${Math.min(index * 100, 1000)}ms both`,
