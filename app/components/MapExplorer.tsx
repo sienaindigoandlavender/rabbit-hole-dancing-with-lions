@@ -112,11 +112,18 @@ export default function MapExplorer({
   const addPointLayers = useCallback((map: mapboxgl.Map) => {
     if (map.getSource("cultural-points")) return;
 
+    console.log(`[DWL Map] Adding ${points.length} points to map`);
+    const validPoints = points.filter((p) => p.lat && p.lng);
+    console.log(`[DWL Map] ${validPoints.length} points have valid lat/lng`);
+    if (validPoints.length > 0) {
+      console.log("[DWL Map] First point coords:", validPoints[0].lat, validPoints[0].lng);
+    }
+
     map.addSource("cultural-points", {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        features: points.map((p) => ({
+        features: validPoints.map((p) => ({
           type: "Feature" as const,
           geometry: { type: "Point" as const, coordinates: [p.lng, p.lat] },
           properties: {

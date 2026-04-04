@@ -37,18 +37,31 @@ export interface DecoderTrail {
 }
 
 export async function getAllPoints(): Promise<DecoderPoint[]> {
-  if (!supabase) return [];
+  if (!supabase) {
+    console.log("[DWL] Supabase client not initialised — missing env vars");
+    return [];
+  }
+
+  console.log("[DWL] Fetching points from decoder_points...");
+  console.log("[DWL] Supabase URL:", supabaseUrl);
+
   const { data, error } = await supabase
     .from("decoder_points")
-    .select(
-      "id, city, title, question, answer, category, lat, lng, darija_word, darija_meaning, darija_literal, darija_context, trail, mj_prompt, hero_image, photo_url, photo_credit"
-    )
+    .select("*")
     .order("city", { ascending: true });
 
   if (error) {
-    console.error("Error fetching points:", error);
+    console.error("[DWL] Error fetching points:", error);
     return [];
   }
+
+  console.log(`[DWL] Fetched ${data?.length || 0} points`);
+  if (data && data.length > 0) {
+    console.log("[DWL] Sample point:", JSON.stringify(data[0], null, 2));
+    console.log("[DWL] Point has lat:", typeof data[0].lat, data[0].lat);
+    console.log("[DWL] Point has lng:", typeof data[0].lng, data[0].lng);
+  }
+
   return data || [];
 }
 
