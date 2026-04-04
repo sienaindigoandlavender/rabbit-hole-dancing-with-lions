@@ -14,7 +14,6 @@ export default function ArchiveHome({ points }: ArchiveHomeProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   const continents = useMemo(() => {
-    // For now, all entries are Morocco → Africa
     return points.length > 0 ? ["Africa"] : [];
   }, [points]);
 
@@ -32,12 +31,11 @@ export default function ArchiveHome({ points }: ArchiveHomeProps) {
 
   return (
     <div className="min-h-screen bg-paper">
-      {/* Flower of Life — warm */}
       <div className="flower-of-life" />
-
       <ArchiveHeader />
 
-      <div style={{ paddingTop: "68px" }}>
+      {/* Content below header */}
+      <div style={{ paddingTop: "94px" }}>
         <FilterBar
           totalResults={filtered.length}
           activeFilter={activeFilter}

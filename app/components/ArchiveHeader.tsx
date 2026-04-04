@@ -7,51 +7,49 @@ interface ArchiveHeaderProps {
 }
 
 export default function ArchiveHeader({ inverted = false }: ArchiveHeaderProps) {
-  const textColor = inverted ? "text-cream" : "text-text-primary";
-  const secondaryColor = inverted ? "text-cream/50" : "text-text-secondary";
-  const borderColor = inverted ? "border-border" : "border-border-warm";
-
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b ${borderColor}`}
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
       style={{
-        height: "68px",
-        paddingLeft: "26px",
-        paddingRight: "26px",
+        height: "52px",
+        paddingLeft: "42px",
+        paddingRight: "42px",
         background: inverted ? "#111111" : "#f7f5f0",
       }}
     >
       <Link
         href="/"
-        className={`font-serif ${textColor} hover:text-terracotta transition-colors duration-fast`}
+        className="font-serif transition-colors duration-fast"
         style={{
-          fontSize: "16px",
+          fontSize: "14px",
           fontVariant: "small-caps",
-          letterSpacing: "0.3em",
+          letterSpacing: "0.35em",
+          color: inverted ? "#f5f0e8" : "#1a1a1a",
         }}
       >
         Dancing with Lions
       </Link>
 
-      <div className="flex items-center" style={{ gap: "26px" }}>
+      <div className="flex items-center" style={{ gap: "42px" }}>
         <Link
-          href="/map"
-          className={`font-sans ${secondaryColor} hover:${textColor} transition-colors duration-fast`}
-          style={{ fontSize: "13px" }}
+          href="/dossiers"
+          className="font-sans transition-colors duration-fast"
+          style={{
+            fontSize: "11px",
+            color: inverted ? "rgba(245,240,232,0.5)" : "#9b978f",
+            letterSpacing: "0.02em",
+          }}
         >
-          Map
-        </Link>
-        <Link
-          href="/calendar"
-          className={`font-sans ${secondaryColor} hover:${textColor} transition-colors duration-fast`}
-          style={{ fontSize: "13px" }}
-        >
-          Calendar
+          Dossiers
         </Link>
         <Link
           href="/about"
-          className={`font-sans ${secondaryColor} hover:${textColor} transition-colors duration-fast`}
-          style={{ fontSize: "13px" }}
+          className="font-sans transition-colors duration-fast"
+          style={{
+            fontSize: "11px",
+            color: inverted ? "rgba(245,240,232,0.5)" : "#9b978f",
+            letterSpacing: "0.02em",
+          }}
         >
           Information
         </Link>

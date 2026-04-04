@@ -9,14 +9,8 @@ interface ArchiveGridProps {
 
 function getArchiveNumber(point: DecoderPoint): string {
   const cityMap: Record<string, string> = {
-    Marrakech: "MA",
-    Fes: "MA",
-    Essaouira: "MA",
-    Rabat: "MA",
-    Tangier: "MA",
-    Casablanca: "MA",
-    Ouarzazate: "MA",
-    Agadir: "MA",
+    Marrakech: "MA", Fes: "MA", Essaouira: "MA", Rabat: "MA",
+    Tangier: "MA", Casablanca: "MA", Ouarzazate: "MA", Agadir: "MA",
   };
   const code = cityMap[point.city] || "XX";
   const num = point.id.replace(/[^0-9]/g, "").slice(-3).padStart(3, "0");
@@ -26,47 +20,69 @@ function getArchiveNumber(point: DecoderPoint): string {
 export default function ArchiveGrid({ points }: ArchiveGridProps) {
   return (
     <div
-      className="masonry-grid"
-      style={{ padding: "26px", maxWidth: "1200px", margin: "0 auto" }}
+      style={{
+        padding: "0 42px 110px",
+        maxWidth: "1400px",
+        margin: "0 auto",
+        columns: "3",
+        columnGap: "42px",
+      }}
+      className="cereal-grid"
     >
+      <style jsx>{`
+        @media (max-width: 1024px) {
+          .cereal-grid { columns: 2 !important; }
+        }
+        @media (max-width: 640px) {
+          .cereal-grid { columns: 1 !important; }
+        }
+      `}</style>
+
       {points.map((point, index) => (
         <Link
           key={point.id}
           href={`/dossiers/${point.id}`}
           className="block group"
           style={{
-            animation: `gridFadeIn 600ms var(--ease-phi) ${Math.min(index * 100, 1000)}ms both`,
+            breakInside: "avoid",
+            marginBottom: "42px",
+            animation: `gridFadeIn 600ms var(--ease-phi) ${Math.min(index * 80, 800)}ms both`,
           }}
         >
-          {/* Photo — real photograph if available */}
+          {/* Photo — varied aspect ratios like Cereal */}
           {point.photo_url && (
-            <div className="overflow-hidden" style={{ borderRadius: "4px", marginBottom: "10px" }}>
+            <div style={{ marginBottom: "16px" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={point.photo_url}
                 alt={point.title}
                 className="w-full h-auto transition-opacity duration-fast group-hover:opacity-100"
-                style={{ opacity: 0.9 }}
+                style={{ opacity: 0.92, display: "block" }}
               />
             </div>
           )}
 
-          {/* Archive number */}
+          {/* Archive number — tiny, barely there */}
           <p
             className="font-sans"
-            style={{ fontSize: "10px", color: "var(--text-tertiary)" }}
+            style={{
+              fontSize: "9px",
+              color: "#9b978f",
+              letterSpacing: "0.05em",
+              marginBottom: "4px",
+            }}
           >
             ({getArchiveNumber(point)})
           </p>
 
-          {/* Title */}
+          {/* Title — the only thing that matters */}
           <p
             className="font-serif group-hover:text-terracotta transition-colors duration-fast"
             style={{
-              fontSize: "16px",
-              color: "var(--text-primary)",
-              marginTop: "4px",
-              lineHeight: "1.3",
+              fontSize: "15px",
+              color: "#1a1a1a",
+              lineHeight: "1.35",
+              fontWeight: 400,
             }}
           >
             {point.title}
@@ -74,41 +90,41 @@ export default function ArchiveGrid({ points }: ArchiveGridProps) {
         </Link>
       ))}
 
-      {/* Map portal card */}
+      {/* Map portal — dark card in the grid */}
       <Link
-        href="/map"
+        href="/"
         className="block group"
         style={{
-          animation: `gridFadeIn 600ms var(--ease-phi) 300ms both`,
+          breakInside: "avoid",
+          marginBottom: "42px",
+          animation: `gridFadeIn 600ms var(--ease-phi) 400ms both`,
         }}
       >
         <div
           style={{
             background: "#111111",
-            borderRadius: "4px",
-            padding: "42px 26px",
-            marginBottom: "10px",
+            padding: "68px 26px",
           }}
         >
           <div className="flex justify-center" style={{ gap: "6px", marginBottom: "16px" }}>
-            {[...Array(5)].map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
                 className="rounded-full"
                 style={{
-                  width: "6px",
-                  height: "6px",
+                  width: "4px",
+                  height: "4px",
                   background: "#d4a254",
-                  opacity: 0.5 + Math.random() * 0.5,
+                  opacity: 0.4 + i * 0.12,
                 }}
               />
             ))}
           </div>
           <p
             className="font-sans text-center"
-            style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.6 }}
+            style={{ fontSize: "10px", color: "#f5f0e8", opacity: 0.5, letterSpacing: "0.05em" }}
           >
-            Explore the archive on the map →
+            Explore on the map →
           </p>
         </div>
       </Link>

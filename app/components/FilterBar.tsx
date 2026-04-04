@@ -16,97 +16,92 @@ export default function FilterBar({
   availableThreads,
 }: FilterBarProps) {
   return (
-    <div
-      className="border-b border-border-warm"
-      style={{ padding: "26px 26px 16px" }}
-    >
-      <div className="max-w-article mx-auto">
-        <div className="flex flex-wrap" style={{ gap: "42px" }}>
-          {/* Continents */}
-          {availableContinents.length > 0 && (
-            <div>
-              <p
-                className="font-sans text-text-tertiary uppercase"
-                style={{
-                  fontSize: "10px",
-                  letterSpacing: "0.1em",
-                  marginBottom: "10px",
-                }}
-              >
-                Continents
-              </p>
-              <div className="flex flex-col" style={{ gap: "4px" }}>
-                {availableContinents.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() =>
-                      onFilter(activeFilter === c ? null : c)
-                    }
-                    className={`font-sans text-left transition-colors duration-fast ${activeFilter === c ? "text-text-primary underline" : "text-text-secondary hover:text-text-primary"}`}
-                    style={{
-                      fontSize: "13px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+    <div style={{ padding: "0 42px 42px" }}>
+      {/* Filters — right-aligned, Cereal style */}
+      <div className="flex justify-end" style={{ gap: "68px", marginBottom: "26px" }}>
+        {availableContinents.length > 0 && (
+          <div>
+            <p
+              className="font-sans uppercase"
+              style={{
+                fontSize: "9px",
+                letterSpacing: "0.15em",
+                color: "#9b978f",
+                marginBottom: "10px",
+              }}
+            >
+              Continents
+            </p>
+            <div className="flex flex-col" style={{ gap: "3px" }}>
+              {availableContinents.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => onFilter(activeFilter === c ? null : c)}
+                  className="font-sans text-left transition-colors duration-fast"
+                  style={{
+                    fontSize: "12px",
+                    color: activeFilter === c ? "#1a1a1a" : "#9b978f",
+                    textDecoration: activeFilter === c ? "underline" : "none",
+                    textUnderlineOffset: "3px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  {c}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Threads */}
-          {availableThreads.length > 0 && (
-            <div>
-              <p
-                className="font-sans text-text-tertiary uppercase"
-                style={{
-                  fontSize: "10px",
-                  letterSpacing: "0.1em",
-                  marginBottom: "10px",
-                }}
-              >
-                Threads
-              </p>
-              <div className="flex flex-col" style={{ gap: "4px" }}>
-                {availableThreads.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() =>
-                      onFilter(activeFilter === t ? null : t)
-                    }
-                    className={`font-sans text-left transition-colors duration-fast ${activeFilter === t ? "text-text-primary underline" : "text-text-secondary hover:text-text-primary"}`}
-                    style={{
-                      fontSize: "13px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
+        {availableThreads.length > 0 && (
+          <div>
+            <p
+              className="font-sans uppercase"
+              style={{
+                fontSize: "9px",
+                letterSpacing: "0.15em",
+                color: "#9b978f",
+                marginBottom: "10px",
+              }}
+            >
+              Threads
+            </p>
+            <div className="flex flex-col" style={{ gap: "3px" }}>
+              {availableThreads.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => onFilter(activeFilter === t ? null : t)}
+                  className="font-sans text-left transition-colors duration-fast"
+                  style={{
+                    fontSize: "12px",
+                    color: activeFilter === t ? "#1a1a1a" : "#9b978f",
+                    textDecoration: activeFilter === t ? "underline" : "none",
+                    textUnderlineOffset: "3px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  {t}
+                </button>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-        {/* Results count + sort */}
-        <div
-          className="flex items-center justify-between"
-          style={{ marginTop: "16px" }}
-        >
-          <span className="font-sans text-text-tertiary" style={{ fontSize: "13px" }}>
-            Results: {totalResults.toLocaleString()}
-          </span>
-          <span className="font-sans text-text-tertiary" style={{ fontSize: "13px" }}>
-            Sort by: Unsystematic
-          </span>
-        </div>
+      {/* Results + sort — full width, spaced apart */}
+      <div className="flex items-center justify-between">
+        <span className="font-sans" style={{ fontSize: "11px", color: "#9b978f" }}>
+          Results: {totalResults}
+        </span>
+        <span className="font-sans" style={{ fontSize: "11px", color: "#9b978f" }}>
+          Sort by: Unsystematic
+        </span>
       </div>
     </div>
   );
