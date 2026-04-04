@@ -139,58 +139,57 @@ export default function MapExplorer({
       clusterRadius: 50,
     });
 
-    // Clusters
+    // Clusters — soft glow, not buttons
     map.addLayer({
       id: "clusters", type: "circle", source: "cultural-points",
       filter: ["has", "point_count"],
       paint: {
         "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 30, 25],
-        "circle-color": "#d4a254", "circle-opacity": 0.25,
-        "circle-stroke-width": 1, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.4,
+        "circle-color": "#d4a254", "circle-opacity": 0.15,
+        "circle-stroke-width": 1, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.3,
       },
     });
 
     map.addLayer({
       id: "cluster-count", type: "symbol", source: "cultural-points",
       filter: ["has", "point_count"],
-      layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"], "text-size": 12 },
-      paint: { "text-color": "#6b6860" },
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"], "text-size": 10 },
+      paint: { "text-color": "#d4a254", "text-opacity": 0.6 },
     });
 
-    // Gentle glow ring (animated via JS)
+    // Breathing pulse ring — expands 8→16px and fades over 2600ms
     map.addLayer({
       id: "point-glow", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-radius": 10, "circle-color": "transparent", "circle-opacity": 0,
-        "circle-stroke-width": 1, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.2,
+        "circle-radius": 8, "circle-color": "transparent", "circle-opacity": 0,
+        "circle-stroke-width": 1.5, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.4,
       },
     });
 
-    // Amber dot
+    // Amber dot — 8px, bright, the most alive thing on screen
     map.addLayer({
       id: "unclustered-point", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-radius": 5, "circle-color": "#d4a254", "circle-opacity": 0.85,
-        "circle-stroke-width": 4, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.12,
+        "circle-radius": 4, "circle-color": "#d4a254", "circle-opacity": 0.95,
+        "circle-stroke-width": 6, "circle-stroke-color": "#d4a254", "circle-stroke-opacity": 0.15,
       },
     });
 
-    // Bright centre
+    // Bright centre — hot core
     map.addLayer({
       id: "unclustered-point-centre", type: "circle", source: "cultural-points",
       filter: ["!", ["has", "point_count"]],
-      paint: { "circle-radius": 2, "circle-color": "#e8c178", "circle-opacity": 1 },
+      paint: { "circle-radius": 2, "circle-color": "#f5e6c8", "circle-opacity": 1 },
     });
 
-    // Gentle pulse animation
+    // Breathing pulse — ring expands from 8 to 16px, fades as it grows
     const animatePulse = () => {
       if (!map.getLayer("point-glow")) return;
       const t = (Date.now() % 2600) / 2600;
-      const ease = Math.sin(t * Math.PI); // smooth sine wave
-      const radius = 8 + ease * 6;
-      const opacity = 0.15 + ease * 0.1;
+      const radius = 8 + t * 8; // 8px → 16px
+      const opacity = 0.4 * (1 - t); // fades to 0 as it expands
       map.setPaintProperty("point-glow", "circle-stroke-opacity", opacity);
       map.setPaintProperty("point-glow", "circle-radius", radius);
       pulseRef.current = requestAnimationFrame(animatePulse);
@@ -329,25 +328,21 @@ export default function MapExplorer({
 
       {showCard && selectedPoint && <PointCard point={selectedPoint} onClose={closeCard} />}
 
-      {/* Satellite toggle */}
+      {/* Satellite toggle — text only */}
       {showStyleToggle && (
         <button
           onClick={toggleStyle}
-          className="absolute z-40 transition-opacity duration-fast"
+          className="absolute z-40 font-sans transition-opacity duration-fast"
           style={{
-            bottom: "16px", right: "16px", width: "32px", height: "32px",
+            bottom: "16px", right: "16px",
             background: "none", border: "none", cursor: "pointer",
-            opacity: isSatellite ? 0.9 : 0.4,
+            fontSize: "10px", color: "#f5f0e8", opacity: 0.4,
+            letterSpacing: "0.05em",
           }}
-          title={isSatellite ? "Map view" : "Satellite view"}
+          title={isSatellite ? "Switch to map" : "Switch to satellite"}
           aria-label="Toggle map style"
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke={isSatellite ? "#c4613a" : "#9b978f"} strokeWidth="1.5"
-            strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          {isSatellite ? "MAP" : "SAT"}
         </button>
       )}
     </div>
